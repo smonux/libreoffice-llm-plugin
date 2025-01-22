@@ -38,14 +38,21 @@ def get_param(key):
             return params.get(key)
 
 def set_param(key, value):
-        """Set parameter in JSON file"""
-        # go ahead ai!
-        with open(PARAMS_PATH, 'r+') as f:
+        """Set parameter in JSON file atomically"""
+        # Load existing params first
+        with open(PARAMS_PATH, 'r') as f:
             params = json.load(f)
-            params[key] = value
-            f.seek(0)
+        
+        # Update the requested parameter
+        params[key] = value
+        
+        # Write to temporary file first to prevent corruption
+        temp_path = PARAMS_PATH + ".tmp"
+        with open(temp_path, 'w') as f:
             json.dump(params, f)
-            f.truncate()
+        
+        # Atomically replace original file
+        os.replace(temp_path, PARAMS_PATH)
 
 def get_context(cursor):
         """Get previous and next tokens around cursor position"""
