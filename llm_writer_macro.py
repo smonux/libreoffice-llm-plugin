@@ -88,9 +88,10 @@ def autocomplete(cursor):
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            error_msg = f"{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
-            show_message(f"Error: {error_msg}")
-            _log_api_call("autocomplete", {"error": error_msg}, {}, 500)
+            error_msg = f"{str(e)}\n\nTraceback:\n" + "\n".join(traceback.format_exc().splitlines()[-3:])
+            full_error = f"{str(e)}\n\nFull Traceback:\n{traceback.format_exc()}"
+            show_message(f"ERROR: {error_msg}\n\nSee logs for full details")
+            _log_api_call("autocomplete", {"error": full_error}, {}, 500)
 
 def transform_text(cursor, instruction=None):
         """Transform selected text based on instruction"""
@@ -236,8 +237,13 @@ def show_logs():
             log_text += f"[{timestamp}]\n"
             log_text += f"Endpoint: {endpoint}\n"
             log_text += f"Status: {status_code}\n"
-            log_text += f"Request: {request[:200]}...\n"
-            log_text += f"Response: {str(response)[:200]}...\n"
+            
+            if 'error' in request:
+                log_text += f"Error: {request['error']}\n"
+            else:
+                log_text += f"Request: {json.dumps(request)[:200]}...\n"
+                
+            log_text += f"Response: {json.dumps(response)[:200]}...\n"
             log_text += "-" * 40 + "\n"
             
         show_message(log_text)
