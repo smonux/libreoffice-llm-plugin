@@ -1,6 +1,7 @@
 import uno
 import unohelper
 import shelve
+import datetime
 import urllib.request
 import urllib.parse
 import json
@@ -12,7 +13,7 @@ DB_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_params.db")  # .db e
 
 def init_db():
         """Initialize shelve database for parameters"""
-        with shelve.open(self.db_path) as db:
+        with shelve.open(DB_PATH) as db:
             # Initialize parameters with defaults if missing
             defaults = {
                 'OPENAI_ENDPOINT': 'https://api.openai.com/v1/chat/completions',
@@ -32,19 +33,19 @@ def init_db():
 
 def get_param(key):
         """Get parameter from shelve database"""
-        with shelve.open(self.db_path) as db:
+        with shelve.open(DB_PATH) as db:
             return db.get(key)
 
 def set_param(key, value):
         """Set parameter in shelve database"""
-        with shelve.open(self.db_path) as db:
+        with shelve.open(DB_PATH) as db:
             db[key] = value
 
 def get_context(cursor):
         """Get previous and next tokens around cursor position"""
         text = cursor.getText()
-        prev_chars = int(self.get_param('CONTEXT_PREVIOUS_CHARS'))
-        next_chars = int(self.get_param('CONTEXT_NEXT_CHARS'))
+        prev_chars = int(get_param('CONTEXT_PREVIOUS_CHARS'))
+        next_chars = int(get_param('CONTEXT_NEXT_CHARS'))
         
         start = max(0, cursor.getStart() - prev_chars)
         end = min(len(text.getString()), cursor.getEnd() + next_chars)
@@ -98,12 +99,12 @@ def transform_text(self, cursor, instruction=None):
         except Exception as e:
             self.show_message(f"Error: {str(e)}")
 
-def call_llm(data):
+def call_llm(data):  # Removed self parameter
         """Make API call to OpenAI-compatible endpoint"""
-        url = self.get_param('OPENAI_ENDPOINT') 
+        url = get_param('OPENAI_ENDPOINT') 
         headers = {
             'Content-Type': 'application/json',
-            'Authorization': f"Bearer {self.get_param('OPENAI_API_KEY')}"
+            'Authorization': f"Bearer {get_param('OPENAI_API_KEY')}"
         }
         
         req = urllib.request.Request(url, 
@@ -113,15 +114,15 @@ def call_llm(data):
         try:
             with urllib.request.urlopen(req) as response:
                 response_data = json.loads(response.read().decode('utf-8'))
-                self._log_api_call(url, data, response_data, response.status)
+                _log_api_call(url, data, response_data, response.status)
                 return response_data
         except urllib.error.HTTPError as e:
-            self._log_api_call(url, data, str(e), e.code)
+            _log_api_call(url, data, str(e), e.code)
             raise
 
 def _log_api_call(endpoint, request, response, status_code):
         """Log API call details to database"""
-        with shelve.open(self.db_path) as db:
+        with shelve.open(DB_PATH) as db:
             logs = db.get('api_logs', [])
             logs.insert(0, {
                 'timestamp': datetime.datetime.now().isoformat(),
@@ -135,7 +136,7 @@ def _log_api_call(endpoint, request, response, status_code):
 
 def get_api_logs(limit=100):
         """Retrieve API logs from database"""
-        with shelve.open(self.db_path) as db:
+        with shelve.open(DB_PATH) as db:
             return db.get('api_logs', [])[:limit]
 
 def show_message(message):
@@ -150,7 +151,7 @@ def show_message(message):
 
 def _get_cursor():
         """Get text cursor from current selection"""
-        xModel = XSCRIPTCONTEXT.getDocument()
+        xModel = uno.getComponentContext().getServiceManager().createInstanceWithContext("com.sun.star.frame.Desktop", uno.getComponentContext()).getCurrentComponent()
         xSelectionSupplier = xModel.getCurrentController()
         xIndexAccess = xSelectionSupplier.getSelection()
         return xIndexAccess.getByIndex(0)
