@@ -234,9 +234,6 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
             
         self.show_message(log_text)
 
-# Export the macros properly
-g_exportedScripts = (autocomplete, transform_text, show_logs)
-
     def show_input_dialog(self, message):
         """Show input dialog"""
         ctx = uno.getComponentContext()
@@ -250,22 +247,6 @@ g_exportedScripts = (autocomplete, transform_text, show_logs)
             return dialog.getValue()
         return None
 
-    def show_logs(self):
-        """Display API logs in message box"""
-        logs = self.get_api_logs()
-        if not logs:
-            self.show_message("No API logs found")
-            return
-            
-        log_text = "API Logs:\n\n"
-        for log in logs:
-            log_id, timestamp, endpoint, request, response, status_code = log
-            log_text += f"[{timestamp}]\n"
-            log_text += f"Endpoint: {endpoint}\n"
-            log_text += f"Status: {status_code}\n"
-            log_text += f"Request: {request[:200]}...\n"
-            log_text += f"Response: {str(response)[:200]}...\n"
-            log_text += "-" * 40 + "\n"
-            
-        self.show_message(log_text)
+# Export the macros properly
+g_exportedScripts = (autocomplete, transform_text, show_logs)
 
