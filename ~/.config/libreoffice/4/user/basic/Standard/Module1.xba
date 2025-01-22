@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE library:library PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "library.dtd">
+<library:library xmlns:library="http://openoffice.org/2000/library" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <library:element library:name="Module1"/>
+  <library:component xlink:href="Module1.xba"/>
+</library:library>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<module:module xmlns:module="http://openoffice.org/2000/module" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <module:shortcut>
+    <module:name>Autocomplete</module:name>
+    <module:key>Ctrl+Alt+C</module:key>
+    <module:macro>vnd.sun.star.script:LLMWriterMacro.Autocomplete?language=Python&location=user</module:macro>
+  </module:shortcut>
+  <module:shortcut>
+    <module:name>Transform</module:name>
+    <module:key>Ctrl+Alt+T</module:key>
+    <module:macro>vnd.sun.star.script:LLMWriterMacro.Transform?language=Python&location=user</module:macro>
+  </module:shortcut>
+</module:module>
