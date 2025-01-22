@@ -9,38 +9,42 @@ from com.sun.star.task import XJobExecutor
 from com.sun.star.awt import MessageBoxButtons as MSG_BUTTONS
 import os
 
-# Change the database for a json file for the parameters, and the logs have to go to a file. ai!
-DB_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_params.db")  # .db extension kept for compatibility
+PARAMS_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_params.json")
+LOG_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_api_logs.json")
 
 def init_db():
-        """Initialize shelve database for parameters"""
-        with shelve.open(DB_PATH) as db:
-            # Initialize parameters with defaults if missing
-            defaults = {
-                'OPENAI_ENDPOINT': 'https://api.openai.com/v1/chat/completions',
-                'OPENAI_API_KEY': '',
-                'MAX_GENERATION_TOKENS': '100',
-                'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS': 'Continue the text naturally',
-                'CONTEXT_PREVIOUS_CHARS': '100',
-                'CONTEXT_NEXT_CHARS': '100'
-            }
-            for key, value in defaults.items():
-                if key not in db:
-                    db[key] = value
-            
-            # Initialize api_logs if missing
-            if 'api_logs' not in db:
-                db['api_logs'] = []
+        """Initialize JSON files for parameters and logs"""
+        # Initialize parameters file
+        if not os.path.exists(PARAMS_PATH):
+            with open(PARAMS_PATH, 'w') as f:
+                json.dump({
+                    'OPENAI_ENDPOINT': 'https://api.openai.com/v1/chat/completions',
+                    'OPENAI_API_KEY': '',
+                    'MAX_GENERATION_TOKENS': '100',
+                    'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS': 'Continue the text naturally',
+                    'CONTEXT_PREVIOUS_CHARS': '100',
+                    'CONTEXT_NEXT_CHARS': '100'
+                }, f)
+        
+        # Initialize logs file
+        if not os.path.exists(LOG_PATH):
+            with open(LOG_PATH, 'w') as f:
+                json.dump([], f)
 
 def get_param(key):
-        """Get parameter from shelve database"""
-        with shelve.open(DB_PATH) as db:
-            return db.get(key)
+        """Get parameter from JSON file"""
+        with open(PARAMS_PATH, 'r') as f:
+            params = json.load(f)
+            return params.get(key)
 
 def set_param(key, value):
-        """Set parameter in shelve database"""
-        with shelve.open(DB_PATH) as db:
-            db[key] = value
+        """Set parameter in JSON file"""
+        with open(PARAMS_PATH, 'r+') as f:
+            params = json.load(f)
+            params[key] = value
+            f.seek(0)
+            json.dump(params, f)
+            f.truncate()
 
 def get_context(cursor):
         """Get previous and next tokens around cursor position"""
@@ -122,23 +126,26 @@ def call_llm(data):
             raise
 
 def _log_api_call(endpoint, request, response, status_code):
-        """Log API call details to database"""
-        with shelve.open(DB_PATH) as db:
-            logs = db.get('api_logs', [])
-            logs.insert(0, {
-                'timestamp': datetime.datetime.now().isoformat(),
-                'endpoint': endpoint,
-                'request': request,
-                'response': response,
-                'status_code': status_code,
-                'id': len(logs) + 1
-            })
-            db['api_logs'] = logs
+        """Log API call details to JSON file"""
+        log_entry = {
+            'timestamp': datetime.datetime.now().isoformat(),
+            'endpoint': endpoint,
+            'request': request,
+            'response': response,
+            'status_code': status_code
+        }
+        
+        with open(LOG_PATH, 'r+') as f:
+            logs = json.load(f)
+            logs.insert(0, log_entry)
+            f.seek(0)
+            json.dump(logs, f)
+            f.truncate()
 
 def get_api_logs(limit=100):
-        """Retrieve API logs from database"""
-        with shelve.open(DB_PATH) as db:
-            return db.get('api_logs', [])[:limit]
+        """Retrieve API logs from JSON file"""
+        with open(LOG_PATH, 'r') as f:
+            return json.load(f)[:limit]
 
 def show_message(message):
         """Show message dialog"""
