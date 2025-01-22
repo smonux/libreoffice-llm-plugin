@@ -8,13 +8,9 @@ from com.sun.star.task import XJobExecutor
 from com.sun.star.awt import MessageBoxButtons as MSG_BUTTONS
 import os
 
-class LLMWriterMacro(unohelper.Base, XJobExecutor):
-    def __init__(self, ctx):
-        self.ctx = ctx
-        self.db_path = os.path.join(os.path.expanduser("~"), "llm_writer_params.db")
-        self.init_db()
-        
-    def init_db(self):
+DB_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_params.db")
+
+def init_db():
         """Initialize SQLite database for parameters"""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute('''CREATE TABLE IF NOT EXISTS parameters
@@ -39,20 +35,20 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
                 conn.execute('INSERT OR IGNORE INTO parameters (key, value) VALUES (?, ?)', (key, value))
             conn.commit()
 
-    def get_param(self, key):
+def get_param(key):
         """Get parameter from SQLite database"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute('SELECT value FROM parameters WHERE key = ?', (key,))
             result = cursor.fetchone()
             return result[0] if result else None
 
-    def set_param(self, key, value):
+def set_param(key, value):
         """Set parameter in SQLite database"""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute('INSERT OR REPLACE INTO parameters (key, value) VALUES (?, ?)', (key, value))
             conn.commit()
 
-    def get_context(self, cursor):
+def get_context(cursor):
         """Get previous and next tokens around cursor position"""
         text = cursor.getText()
         prev_chars = int(self.get_param('CONTEXT_PREVIOUS_CHARS'))
@@ -110,7 +106,7 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
         except Exception as e:
             self.show_message(f"Error: {str(e)}")
 
-    def call_llm(self, data):
+def call_llm(data):
         """Make API call to OpenAI-compatible endpoint"""
         url = self.get_param('OPENAI_ENDPOINT') 
         headers = {
@@ -131,7 +127,7 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
             self._log_api_call(url, data, str(e), e.code)
             raise
 
-    def _log_api_call(self, endpoint, request, response, status_code):
+def _log_api_call(endpoint, request, response, status_code):
         """Log API call details to database"""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute('''INSERT INTO api_logs 
@@ -142,7 +138,7 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
                           status_code))
             conn.commit()
 
-    def get_api_logs(self, limit=100):
+def get_api_logs(limit=100):
         """Retrieve API logs from database"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute('''SELECT * FROM api_logs 
@@ -150,7 +146,7 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
                                   LIMIT ?''', (limit,))
             return cursor.fetchall()
 
-    def show_message(self, message):
+def show_message(message):
         """Show message dialog"""
         ctx = uno.getComponentContext()
         sm = ctx.getServiceManager()
@@ -160,7 +156,7 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
             None, MSG_BUTTONS.BUTTONS_OK, "infobox", "LLM Writer", message)
         msgbox.execute()
 
-    def _get_cursor(self):
+def _get_cursor():
         """Get text cursor from current selection"""
         xModel = XSCRIPTCONTEXT.getDocument()
         xSelectionSupplier = xModel.getCurrentController()
@@ -234,7 +230,7 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
             
         self.show_message(log_text)
 
-    def show_input_dialog(self, message):
+def show_input_dialog(message):
         """Show input dialog"""
         ctx = uno.getComponentContext()
         sm = ctx.getServiceManager()
@@ -247,7 +243,6 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
             return dialog.getValue()
         return None
 
-llmwriter = LLMWriterMacro()
 # Export the macros properly
-g_exportedScripts = (llmwriter.autocomplete, llmwriter.transform_text, llmwriter.show_logs)
+g_exportedScripts = (autocomplete, transform_text, show_logs)
 
