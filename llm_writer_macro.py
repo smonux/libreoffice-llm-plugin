@@ -4,6 +4,7 @@ import datetime
 import urllib.request
 import urllib.parse
 import json
+import traceback
 from com.sun.star.task import XJobExecutor
 from com.sun.star.awt import MessageBoxButtons as MSG_BUTTONS
 import os
@@ -87,7 +88,6 @@ def autocomplete(cursor):
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            import traceback
             error_msg = f"{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
             show_message(f"Error: {error_msg}")
             _log_api_call("autocomplete", {"error": error_msg}, {}, 500)
