@@ -254,5 +254,6 @@ def show_input_dialog(message):
         return None
 
 # Export the macros properly
+init_db()
 g_exportedScripts = (autocomplete, transform_text, show_logs)
 
