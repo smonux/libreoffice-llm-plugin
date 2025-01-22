@@ -20,6 +20,7 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
             conn.execute('''CREATE TABLE IF NOT EXISTS parameters
                          (key TEXT PRIMARY KEY, value TEXT)''')
             # Set default values if they don't exist
+            #Add the endpoint of openai as default. Add the CONTEXT_PREVIOUS_CHARS and CONTEXT_NEXT_CHARS AI!
             defaults = {
                 'OPENAI_ENDPOINT': 'http://127.0.0.1:5000',
                 'OPENAI_API_KEY': '',
@@ -66,7 +67,7 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
                 'prompt': prompt,
                 'max_tokens': int(self.get_param('MAX_GENERATION_TOKENS')),
                 'temperature': 0.7,
-                'stop': ['\n']
+                'stop': ['\n'] 
             }
             
             response = self.call_llm(data)
