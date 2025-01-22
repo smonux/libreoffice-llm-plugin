@@ -1,6 +1,5 @@
 import uno
 import unohelper
-import shelve
 import datetime
 import urllib.request
 import urllib.parse
