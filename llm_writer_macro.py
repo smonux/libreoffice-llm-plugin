@@ -87,6 +87,7 @@ def autocomplete(cursor):
             if response:
                 cursor.setString(response['choices'][0]['text'])
                 
+                # when a exception like this is catched log it with backtrace info ai!
         except Exception as e:
             show_message(f"Error: {str(e)}")
 
