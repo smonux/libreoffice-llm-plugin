@@ -88,9 +88,9 @@ def autocomplete(cursor):
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            error_msg = f"{str(e)}\n\nTraceback:\n" + "\n".join(traceback.format_exc().splitlines()[-3:])
-            full_error = f"{str(e)}\n\nFull Traceback:\n{traceback.format_exc()}"
-            show_message(f"ERROR: {error_msg}\n\nSee logs for full details")
+            error_msg = f"ERROR: {str(e)}\n\nMost recent traceback lines:\n" + "\\n".join(traceback.format_exc().splitlines()[-3:])
+            full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
+            show_message(f"{error_msg}\n\nCheck ~/llm_writer_api_logs.json for complete details")
             _log_api_call("autocomplete", {"error": full_error}, {}, 500)
 
 def transform_text(cursor, instruction=None):
@@ -239,11 +239,11 @@ def show_logs():
             log_text += f"Status: {status_code}\n"
             
             if 'error' in request:
-                log_text += f"Error: {request['error']}\n"
+                log_text += f"Error Details:\n{request['error']}\n"
             else:
-                log_text += f"Request: {json.dumps(request)[:200]}...\n"
+                log_text += f"Request: {json.dumps(request, indent=2)[:500]}...\n"
                 
-            log_text += f"Response: {json.dumps(response)[:200]}...\n"
+            log_text += f"Response: {json.dumps(response, indent=2)[:500]}...\n"
             log_text += "-" * 40 + "\n"
             
         show_message(log_text)
