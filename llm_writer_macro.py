@@ -163,7 +163,7 @@ def _get_cursor():
         xIndexAccess = xSelectionSupplier.getSelection()
         return xIndexAccess.getByIndex(0)
 
-    def autocomplete(self):
+def autocomplete(self):
         """Generate autocomplete suggestions using LLM"""
         try:
             cursor = self._get_cursor()
@@ -186,7 +186,7 @@ def _get_cursor():
         except Exception as e:
             self.show_message(f"Error: {str(e)}")
 
-    def transform_text(self):
+def transform_text(self):
         """Transform selected text based on instruction"""
         try:
             cursor = self._get_cursor()
@@ -211,7 +211,7 @@ def _get_cursor():
         except Exception as e:
             self.show_message(f"Error: {str(e)}")
 
-    def show_logs(self):
+def show_logs(self):
         """Display API logs in message box"""
         logs = self.get_api_logs()
         if not logs:
