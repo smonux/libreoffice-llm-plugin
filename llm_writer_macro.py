@@ -62,7 +62,7 @@ def get_context(cursor):
         
         return previous_context, next_context
 
-    def autocomplete(self, cursor):
+def autocomplete(self, cursor):
         """Generate autocomplete suggestions using LLM"""
         try:
             previous_context, next_context = self.get_context(cursor)
@@ -84,7 +84,7 @@ def get_context(cursor):
         except Exception as e:
             self.show_message(f"Error: {str(e)}")
 
-    def transform_text(self, cursor, instruction=None):
+def transform_text(self, cursor, instruction=None):
         """Transform selected text based on instruction"""
         try:
             selected_text = cursor.getString()
