@@ -60,8 +60,8 @@ def get_context(cursor):
         prev_chars = int(get_param('CONTEXT_PREVIOUS_CHARS'))
         next_chars = int(get_param('CONTEXT_NEXT_CHARS'))
         
-        start = max(0, int(cursor.getStart()) - prev_chars)
-        end = min(len(text.getString()), int(cursor.getEnd()) + next_chars)
+        start = max(0, int(cursor.getStart().Value) - prev_chars)
+        end = min(len(text.getString()), int(cursor.getEnd().Value) + next_chars)
         
         previous_context = text.getString()[start:cursor.getStart()]
         next_context = text.getString()[cursor.getEnd():end]
