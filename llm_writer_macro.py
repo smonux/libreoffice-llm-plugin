@@ -54,17 +54,17 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
         start = max(0, cursor.getStart() - prev_chars)
         end = min(len(text.getString()), cursor.getEnd() + next_chars)
         
-        previous = text.getString()[start:cursor.getStart()]
-        next = text.getString()[cursor.getEnd():end]
+        previous_context = text.getString()[start:cursor.getStart()]
+        next_context = text.getString()[cursor.getEnd():end]
         
-        return previous, next
+        return previous_context, next_context
 
     def autocomplete(self, cursor):
         """Generate autocomplete suggestions using LLM"""
         try:
-            previous, next = self.get_context(cursor)
+            previous_context, next_context = self.get_context(cursor)
             
-            prompt = f"{previous}[COMPLETE HERE]{next}\n\n" + \
+            prompt = f"{previous_context}[COMPLETE HERE]{next_context}\n\n" + \
                     self.get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')
             
             data = {
