@@ -160,20 +160,82 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
             None, MSG_BUTTONS.BUTTONS_OK, "infobox", "LLM Writer", message)
         msgbox.execute()
 
-    def trigger(self, args):
-        """Handle macro triggers"""
-        desktop = self.ctx.ServiceManager.createInstanceWithContext(
-            "com.sun.star.frame.Desktop", self.ctx)
-        model = desktop.getCurrentComponent()
-        cursor = model.CurrentController.getSelection().getByIndex(0)
-        
-        if args == "Autocomplete":
-            self.autocomplete(cursor)
-        elif args == "Transform":
+    def _get_cursor(self):
+        """Get text cursor from current selection"""
+        xModel = XSCRIPTCONTEXT.getDocument()
+        xSelectionSupplier = xModel.getCurrentController()
+        xIndexAccess = xSelectionSupplier.getSelection()
+        return xIndexAccess.getByIndex(0)
+
+    def autocomplete(self):
+        """Generate autocomplete suggestions using LLM"""
+        try:
+            cursor = self._get_cursor()
+            previous_context, next_context = self.get_context(cursor)
+            
+            prompt = f"{previous_context}[COMPLETE HERE]{next_context}\n\n" + \
+                    self.get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')
+            
+            data = {
+                'prompt': prompt,
+                'max_tokens': int(self.get_param('MAX_GENERATION_TOKENS')),
+                'temperature': 0.7,
+                'stop': ['\n'] 
+            }
+            
+            response = self.call_llm(data)
+            if response:
+                cursor.setString(response['choices'][0]['text'])
+                
+        except Exception as e:
+            self.show_message(f"Error: {str(e)}")
+
+    def transform_text(self):
+        """Transform selected text based on instruction"""
+        try:
+            cursor = self._get_cursor()
             instruction = self.show_input_dialog("Enter transformation instructions:")
-            self.transform_text(cursor, instruction)
-        elif args == "ShowLogs":
-            self.show_logs()
+            selected_text = cursor.getString()
+            
+            if not instruction:
+                return
+                
+            prompt = f"Original text: {selected_text}\n\nInstruction: {instruction}\n\nTransformed text:"
+            
+            data = {
+                'prompt': prompt,
+                'max_tokens': int(self.get_param('MAX_GENERATION_TOKENS')),
+                'temperature': 0.7
+            }
+            
+            response = self.call_llm(data)
+            if response:
+                cursor.setString(response['choices'][0]['text'])
+                
+        except Exception as e:
+            self.show_message(f"Error: {str(e)}")
+
+    def show_logs(self):
+        """Display API logs in message box"""
+        logs = self.get_api_logs()
+        if not logs:
+            self.show_message("No API logs found")
+            return
+            
+        log_text = "API Logs:\n\n"
+        for log in logs:
+            log_id, timestamp, endpoint, request, response, status_code = log
+            log_text += f"[{timestamp}]\n"
+            log_text += f"Endpoint: {endpoint}\n"
+            log_text += f"Status: {status_code}\n"
+            log_text += f"Request: {request[:200]}...\n"
+            log_text += f"Response: {str(response)[:200]}...\n"
+            log_text += "-" * 40 + "\n"
+            
+        self.show_message(log_text)
+
+# Export the macros properly
+g_exportedScripts = (autocomplete, transform_text, show_logs)
 
     def show_input_dialog(self, message):
         """Show input dialog"""
@@ -207,9 +269,3 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
             
         self.show_message(log_text)
 
-# Register the macro
-g_ImplementationHelper = unohelper.ImplementationHelper()
-g_ImplementationHelper.addImplementation(
-    LLMWriterMacro,
-    "org.extension.llm_writer",
-    ("com.sun.star.task.Job",))
