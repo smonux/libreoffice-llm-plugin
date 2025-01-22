@@ -87,9 +87,11 @@ def autocomplete(cursor):
             if response:
                 cursor.setString(response['choices'][0]['text'])
                 
-                # when a exception like this is catched log it with backtrace info ai!
         except Exception as e:
-            show_message(f"Error: {str(e)}")
+            import traceback
+            error_msg = f"{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
+            show_message(f"Error: {error_msg}")
+            _log_api_call("autocomplete", {"error": error_msg}, {}, 500)
 
 def transform_text(cursor, instruction=None):
         """Transform selected text based on instruction"""
