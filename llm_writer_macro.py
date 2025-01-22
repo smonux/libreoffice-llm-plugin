@@ -20,12 +20,13 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
             conn.execute('''CREATE TABLE IF NOT EXISTS parameters
                          (key TEXT PRIMARY KEY, value TEXT)''')
             # Set default values if they don't exist
-            #Add the endpoint of openai as default. Add the CONTEXT_PREVIOUS_CHARS and CONTEXT_NEXT_CHARS AI!
             defaults = {
                 'OPENAI_ENDPOINT': 'http://127.0.0.1:5000',
                 'OPENAI_API_KEY': '',
                 'MAX_GENERATION_TOKENS': '100',
-                'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS': 'Continue the text naturally'
+                'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS': 'Continue the text naturally',
+                'CONTEXT_PREVIOUS_CHARS': '100',
+                'CONTEXT_NEXT_CHARS': '100'
             }
             for key, value in defaults.items():
                 conn.execute('INSERT OR IGNORE INTO parameters (key, value) VALUES (?, ?)', (key, value))
@@ -44,11 +45,14 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
             conn.execute('INSERT OR REPLACE INTO parameters (key, value) VALUES (?, ?)', (key, value))
             conn.commit()
 
-    def get_context(self, cursor, num_tokens=100):
+    def get_context(self, cursor):
         """Get previous and next tokens around cursor position"""
         text = cursor.getText()
-        start = max(0, cursor.getStart() - num_tokens)
-        end = min(len(text.getString()), cursor.getEnd() + num_tokens)
+        prev_chars = int(self.get_param('CONTEXT_PREVIOUS_CHARS'))
+        next_chars = int(self.get_param('CONTEXT_NEXT_CHARS'))
+        
+        start = max(0, cursor.getStart() - prev_chars)
+        end = min(len(text.getString()), cursor.getEnd() + next_chars)
         
         previous = text.getString()[start:cursor.getStart()]
         next = text.getString()[cursor.getEnd():end]
