@@ -19,6 +19,13 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
         with sqlite3.connect(self.db_path) as conn:
             conn.execute('''CREATE TABLE IF NOT EXISTS parameters
                          (key TEXT PRIMARY KEY, value TEXT)''')
+            conn.execute('''CREATE TABLE IF NOT EXISTS api_logs (
+                         id INTEGER PRIMARY KEY AUTOINCREMENT,
+                         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                         endpoint TEXT,
+                         request TEXT,
+                         response TEXT,
+                         status_code INTEGER)''')
             # Set default values if they don't exist
             defaults = {
                 'OPENAI_ENDPOINT': 'https://api.openai.com/v1/chat/completions',
@@ -115,8 +122,33 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
                                    data=json.dumps(data).encode('utf-8'),
                                    headers=headers)
         
-        with urllib.request.urlopen(req) as response:
-            return json.loads(response.read().decode('utf-8'))
+        try:
+            with urllib.request.urlopen(req) as response:
+                response_data = json.loads(response.read().decode('utf-8'))
+                self._log_api_call(url, data, response_data, response.status)
+                return response_data
+        except urllib.error.HTTPError as e:
+            self._log_api_call(url, data, str(e), e.code)
+            raise
+
+    def _log_api_call(self, endpoint, request, response, status_code):
+        """Log API call details to database"""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute('''INSERT INTO api_logs 
+                         (endpoint, request, response, status_code)
+                         VALUES (?, ?, ?, ?)''',
+                         (endpoint, json.dumps(request), 
+                          json.dumps(response) if isinstance(response, dict) else response,
+                          status_code))
+            conn.commit()
+
+    def get_api_logs(self, limit=100):
+        """Retrieve API logs from database"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.execute('''SELECT * FROM api_logs 
+                                  ORDER BY timestamp DESC 
+                                  LIMIT ?''', (limit,))
+            return cursor.fetchall()
 
     def show_message(self, message):
         """Show message dialog"""
@@ -140,6 +172,8 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
         elif args == "Transform":
             instruction = self.show_input_dialog("Enter transformation instructions:")
             self.transform_text(cursor, instruction)
+        elif args == "ShowLogs":
+            self.show_logs()
 
     def show_input_dialog(self, message):
         """Show input dialog"""
@@ -153,6 +187,25 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
         if dialog.execute():
             return dialog.getValue()
         return None
+
+    def show_logs(self):
+        """Display API logs in message box"""
+        logs = self.get_api_logs()
+        if not logs:
+            self.show_message("No API logs found")
+            return
+            
+        log_text = "API Logs:\n\n"
+        for log in logs:
+            log_id, timestamp, endpoint, request, response, status_code = log
+            log_text += f"[{timestamp}]\n"
+            log_text += f"Endpoint: {endpoint}\n"
+            log_text += f"Status: {status_code}\n"
+            log_text += f"Request: {request[:200]}...\n"
+            log_text += f"Response: {str(response)[:200]}...\n"
+            log_text += "-" * 40 + "\n"
+            
+        self.show_message(log_text)
 
 # Register the macro
 g_ImplementationHelper = unohelper.ImplementationHelper()
