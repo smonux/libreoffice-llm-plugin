@@ -247,6 +247,7 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
             return dialog.getValue()
         return None
 
+llmwriter = LLMWriterMacro()
 # Export the macros properly
-g_exportedScripts = (autocomplete, transform_text, show_logs)
+g_exportedScripts = (llmwriter.autocomplete, llmwriter.transform_text, llmwriter.show_logs)
 
