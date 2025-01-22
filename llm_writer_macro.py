@@ -39,6 +39,7 @@ def get_param(key):
 
 def set_param(key, value):
         """Set parameter in JSON file"""
+        # go ahead ai!
         with open(PARAMS_PATH, 'r+') as f:
             params = json.load(f)
             params[key] = value
