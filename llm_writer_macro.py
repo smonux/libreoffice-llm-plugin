@@ -21,7 +21,7 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
                          (key TEXT PRIMARY KEY, value TEXT)''')
             # Set default values if they don't exist
             defaults = {
-                'OPENAI_ENDPOINT': 'http://127.0.0.1:5000',
+                'OPENAI_ENDPOINT': 'https://api.openai.com/v1/chat/completions',
                 'OPENAI_API_KEY': '',
                 'MAX_GENERATION_TOKENS': '100',
                 'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS': 'Continue the text naturally',
