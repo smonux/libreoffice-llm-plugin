@@ -1,6 +1,6 @@
 import uno
 import unohelper
-import sqlite3
+import shelve
 import urllib.request
 import urllib.parse
 import json
@@ -8,21 +8,12 @@ from com.sun.star.task import XJobExecutor
 from com.sun.star.awt import MessageBoxButtons as MSG_BUTTONS
 import os
 
-DB_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_params.db")
+DB_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_params.db")  # .db extension kept for compatibility
 
 def init_db():
-        """Initialize SQLite database for parameters"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute('''CREATE TABLE IF NOT EXISTS parameters
-                         (key TEXT PRIMARY KEY, value TEXT)''')
-            conn.execute('''CREATE TABLE IF NOT EXISTS api_logs (
-                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                         endpoint TEXT,
-                         request TEXT,
-                         response TEXT,
-                         status_code INTEGER)''')
-            # Set default values if they don't exist
+        """Initialize shelve database for parameters"""
+        with shelve.open(self.db_path) as db:
+            # Initialize parameters with defaults if missing
             defaults = {
                 'OPENAI_ENDPOINT': 'https://api.openai.com/v1/chat/completions',
                 'OPENAI_API_KEY': '',
@@ -32,21 +23,22 @@ def init_db():
                 'CONTEXT_NEXT_CHARS': '100'
             }
             for key, value in defaults.items():
-                conn.execute('INSERT OR IGNORE INTO parameters (key, value) VALUES (?, ?)', (key, value))
-            conn.commit()
+                if key not in db:
+                    db[key] = value
+            
+            # Initialize api_logs if missing
+            if 'api_logs' not in db:
+                db['api_logs'] = []
 
 def get_param(key):
-        """Get parameter from SQLite database"""
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.execute('SELECT value FROM parameters WHERE key = ?', (key,))
-            result = cursor.fetchone()
-            return result[0] if result else None
+        """Get parameter from shelve database"""
+        with shelve.open(self.db_path) as db:
+            return db.get(key)
 
 def set_param(key, value):
-        """Set parameter in SQLite database"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute('INSERT OR REPLACE INTO parameters (key, value) VALUES (?, ?)', (key, value))
-            conn.commit()
+        """Set parameter in shelve database"""
+        with shelve.open(self.db_path) as db:
+            db[key] = value
 
 def get_context(cursor):
         """Get previous and next tokens around cursor position"""
@@ -129,22 +121,22 @@ def call_llm(data):
 
 def _log_api_call(endpoint, request, response, status_code):
         """Log API call details to database"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute('''INSERT INTO api_logs 
-                         (endpoint, request, response, status_code)
-                         VALUES (?, ?, ?, ?)''',
-                         (endpoint, json.dumps(request), 
-                          json.dumps(response) if isinstance(response, dict) else response,
-                          status_code))
-            conn.commit()
+        with shelve.open(self.db_path) as db:
+            logs = db.get('api_logs', [])
+            logs.insert(0, {
+                'timestamp': datetime.datetime.now().isoformat(),
+                'endpoint': endpoint,
+                'request': request,
+                'response': response,
+                'status_code': status_code,
+                'id': len(logs) + 1
+            })
+            db['api_logs'] = logs
 
 def get_api_logs(limit=100):
         """Retrieve API logs from database"""
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.execute('''SELECT * FROM api_logs 
-                                  ORDER BY timestamp DESC 
-                                  LIMIT ?''', (limit,))
-            return cursor.fetchall()
+        with shelve.open(self.db_path) as db:
+            return db.get('api_logs', [])[:limit]
 
 def show_message(message):
         """Show message dialog"""
