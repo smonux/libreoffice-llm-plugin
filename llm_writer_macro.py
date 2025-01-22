@@ -9,6 +9,7 @@ from com.sun.star.task import XJobExecutor
 from com.sun.star.awt import MessageBoxButtons as MSG_BUTTONS
 import os
 
+# Change the database for a json file for the parameters, and the logs have to go to a file. ai!
 DB_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_params.db")  # .db extension kept for compatibility
 
 def init_db():
@@ -55,29 +56,29 @@ def get_context(cursor):
         
         return previous_context, next_context
 
-def autocomplete(self, cursor):
+def autocomplete(cursor):
         """Generate autocomplete suggestions using LLM"""
         try:
-            previous_context, next_context = self.get_context(cursor)
+            previous_context, next_context = get_context(cursor)
             
             prompt = f"{previous_context}[COMPLETE HERE]{next_context}\n\n" + \
-                    self.get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')
+                    get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')
             
             data = {
                 'prompt': prompt,
-                'max_tokens': int(self.get_param('MAX_GENERATION_TOKENS')),
+                'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': 0.7,
                 'stop': ['\n'] 
             }
             
-            response = self.call_llm(data)
+            response = call_llm(data)
             if response:
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            self.show_message(f"Error: {str(e)}")
+            show_message(f"Error: {str(e)}")
 
-def transform_text(self, cursor, instruction=None):
+def transform_text(cursor, instruction=None):
         """Transform selected text based on instruction"""
         try:
             selected_text = cursor.getString()
@@ -88,18 +89,18 @@ def transform_text(self, cursor, instruction=None):
             
             data = {
                 'prompt': prompt,
-                'max_tokens': int(self.get_param('MAX_GENERATION_TOKENS')),
+                'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': 0.7
             }
             
-            response = self.call_llm(data)
+            response = call_llm(data)
             if response:
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            self.show_message(f"Error: {str(e)}")
+            show_message(f"Error: {str(e)}")
 
-def call_llm(data):  # Removed self parameter
+def call_llm(data): 
         """Make API call to OpenAI-compatible endpoint"""
         url = get_param('OPENAI_ENDPOINT') 
         headers = {
@@ -145,8 +146,9 @@ def show_message(message):
         sm = ctx.getServiceManager()
         toolkit = sm.createInstanceWithContext(
             "com.sun.star.awt.Toolkit", ctx)
+        parent = toolkit.getDesktopWindow()
         msgbox = toolkit.createMessageBox(
-            None, MSG_BUTTONS.BUTTONS_OK, "infobox", "LLM Writer", message)
+            parent,  "infobox", MSG_BUTTONS.BUTTONS_OK, "LLM Writer", str(message))
         msgbox.execute()
 
 def _get_cursor():
@@ -156,34 +158,34 @@ def _get_cursor():
         xIndexAccess = xSelectionSupplier.getSelection()
         return xIndexAccess.getByIndex(0)
 
-def autocomplete(self):
+def autocomplete():
         """Generate autocomplete suggestions using LLM"""
         try:
-            cursor = self._get_cursor()
-            previous_context, next_context = self.get_context(cursor)
+            cursor = _get_cursor()
+            previous_context, next_context = get_context(cursor)
             
             prompt = f"{previous_context}[COMPLETE HERE]{next_context}\n\n" + \
-                    self.get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')
+                    get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')
             
             data = {
                 'prompt': prompt,
-                'max_tokens': int(self.get_param('MAX_GENERATION_TOKENS')),
+                'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': 0.7,
                 'stop': ['\n'] 
             }
             
-            response = self.call_llm(data)
+            response = call_llm(data)
             if response:
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            self.show_message(f"Error: {str(e)}")
+            show_message(f"Error: {str(e)}")
 
-def transform_text(self):
+def transform_text():
         """Transform selected text based on instruction"""
         try:
-            cursor = self._get_cursor()
-            instruction = self.show_input_dialog("Enter transformation instructions:")
+            cursor = _get_cursor()
+            instruction = show_input_dialog("Enter transformation instructions:")
             selected_text = cursor.getString()
             
             if not instruction:
@@ -193,22 +195,22 @@ def transform_text(self):
             
             data = {
                 'prompt': prompt,
-                'max_tokens': int(self.get_param('MAX_GENERATION_TOKENS')),
+                'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': 0.7
             }
             
-            response = self.call_llm(data)
+            response = call_llm(data)
             if response:
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            self.show_message(f"Error: {str(e)}")
+            show_message(f"Error: {str(e)}")
 
-def show_logs(self):
+def show_logs():
         """Display API logs in message box"""
-        logs = self.get_api_logs()
+        logs = get_api_logs()
         if not logs:
-            self.show_message("No API logs found")
+            show_message("No API logs found")
             return
             
         log_text = "API Logs:\n\n"
@@ -221,7 +223,7 @@ def show_logs(self):
             log_text += f"Response: {str(response)[:200]}...\n"
             log_text += "-" * 40 + "\n"
             
-        self.show_message(log_text)
+        show_message(log_text)
 
 def show_input_dialog(message):
         """Show input dialog"""
