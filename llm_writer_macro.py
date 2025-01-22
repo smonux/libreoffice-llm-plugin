@@ -11,7 +11,7 @@ import os
 class LLMWriterMacro(unohelper.Base, XJobExecutor):
     def __init__(self, ctx):
         self.ctx = ctx
-        self.db_path = os.path.join(os.path.expanduser("~"), ".llm_writer_params.db")
+        self.db_path = os.path.join(os.path.expanduser("~"), "llm_writer_params.db")
         self.init_db()
         
     def init_db(self):
@@ -112,7 +112,7 @@ class LLMWriterMacro(unohelper.Base, XJobExecutor):
 
     def call_llm(self, data):
         """Make API call to OpenAI-compatible endpoint"""
-        url = self.get_param('OPENAI_ENDPOINT') + "/v1/completions"
+        url = self.get_param('OPENAI_ENDPOINT') 
         headers = {
             'Content-Type': 'application/json',
             'Authorization': f"Bearer {self.get_param('OPENAI_API_KEY')}"
