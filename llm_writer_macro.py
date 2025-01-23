@@ -92,7 +92,7 @@ def autocomplete(cursor):
         except Exception as e:
             error_msg = f"ERROR: {str(e)}\n\nMost recent traceback lines:\n" + "\\n".join(traceback.format_exc().splitlines()[-3:])
             full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
-            show_message(f"{error_msg}\n\nCheck ~/llm_writer_api_logs.json for complete details")
+            show_message(f"{error_msg}\n\nCheck ~/llm_writer_api_logs.json for complete details") 
             _log_api_call("autocomplete", {"error": full_error}, {}, 500)
 
 def transform_text(cursor, instruction=None):
