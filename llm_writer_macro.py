@@ -140,21 +140,17 @@ def call_llm(data):
             raise
 
 def _log_api_call(endpoint, request, response, status_code):
-        """Log API call details to JSON file"""
-        log_entry = {
-            'timestamp': datetime.datetime.now().isoformat(),
-            'endpoint': endpoint,
-            'request': request,
-            'response': response,
-            'status_code': status_code
-        }
-        
-        with open(LOG_PATH, 'r+') as f:
-            logs = json.load(f)
-            logs.insert(0, log_entry)
-            f.seek(0)
-            json.dump(logs, f)
-            f.truncate()
+        """Log API call details to a regular text file"""
+        with open(LOG_PATH, 'a') as f:
+            f.write(f"Timestamp: {datetime.datetime.now().isoformat()}\n")
+            f.write(f"Endpoint: {endpoint}\n")
+            f.write(f"Status Code: {status_code}\n")
+            if 'error' in request:
+                f.write(f"Error Details: {request['error']}\n")
+            else:
+                f.write(f"Request: {request}\n")
+            f.write(f"Response: {response}\n")
+            f.write("-" * 40 + "\n")
 
 def get_api_logs(limit=100):
         """Retrieve API logs from JSON file"""
