@@ -20,7 +20,7 @@ def init_db():
                 json.dump({
                     'OPENAI_ENDPOINT': 'https://api.openai.com/v1/chat/completions',
                     'OPENAI_API_KEY': '',
-                    'MODEL': 'gpt-4o-mini', # Add the model to the api calls ai!
+                    'MODEL': 'gpt-4o-mini',
                     'MAX_GENERATION_TOKENS': '100',
                     'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS': 'Continue the text naturally',
                     'CONTEXT_PREVIOUS_CHARS': '100',
@@ -78,6 +78,7 @@ def autocomplete(cursor):
                     get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')
             
             data = {
+                'model': get_param('MODEL'),
                 'prompt': prompt,
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': 0.7,
@@ -104,6 +105,7 @@ def transform_text(cursor, instruction=None):
             prompt = f"Original text: {selected_text}\n\nInstruction: {instruction}\n\nTransformed text:"
             
             data = {
+                'model': get_param('MODEL'),
                 'prompt': prompt,
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': 0.7
