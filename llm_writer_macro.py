@@ -30,7 +30,7 @@ def init_db():
         # Initialize logs file
         if not os.path.exists(LOG_PATH):
             with open(LOG_PATH, 'w') as f:
-                json.dump([], f)
+                json.dump([], f) # write a simple message of "initalizing..." ai!
 
 def get_param(key):
         """Get parameter from JSON file"""
