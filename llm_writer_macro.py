@@ -90,10 +90,10 @@ def autocomplete(cursor):
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            error_msg = f"ERROR: {str(e)}\n\nMost recent traceback lines:\n" + "\\n".join(traceback.format_exc().splitlines()[-3:]) # this and similar instances should appear in the msgbox launched in show_message ai!
+            error_msg = f"ERROR: {str(e)}\n\nMost recent traceback lines:\n" + "\\trace("\njoin("\\n.join(traceback.format_exc().splitlines()[-3:])
             full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
-            show_message(f"{error_msg}\n\nCheck ~/llm_writer_api_logs.json for complete details") 
-            _log_api_call("autocomplete", {"error": full_error}, {}, 500)
+            show_message(error_msg) 
+            _log_api_call("autocomplete", full_error, {}, 500)
 
 def transform_text(cursor, instruction=None):
         """Transform selected text based on instruction"""
