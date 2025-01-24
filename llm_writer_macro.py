@@ -93,9 +93,9 @@ def autocomplete(cursor):
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            _log_api_call("autocomplete", full_error, {}, 500)
             error_msg = f"ERROR: {str(e)}"
             full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
+            _log_api_call("autocomplete", full_error, {}, 500)
             show_message(full_error) 
 
 def transform_text(cursor, instruction=None):
