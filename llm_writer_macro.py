@@ -24,7 +24,8 @@ def init_db():
                     'MAX_GENERATION_TOKENS': '30',
                     'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS': 'Continue the text naturally in the [COMPLETE] ',
                     'CONTEXT_PREVIOUS_CHARS': '100',
-                    'CONTEXT_NEXT_CHARS': '100'
+                    'CONTEXT_NEXT_CHARS': '100',
+                    'TEMPERATURE': '0.7'
                 }, f, indent=4)
         
         # Initialize logs file
@@ -85,6 +86,7 @@ def autocomplete(cursor):
                 'model': get_param('MODEL'),
                 'prompt': prompt,
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
+                'temperature': float(get_param('TEMPERATURE')),
                 'stop': ['\n'] 
             }
             
@@ -110,7 +112,8 @@ def transform_text(cursor, instruction=None):
             data = {
                 'model': get_param('MODEL'),
                 'prompt': prompt,
-                'max_tokens': int(get_param('MAX_GENERATION_TOKENS'))
+                'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
+                'temperature': float(get_param('TEMPERATURE'))
             }
             
             response = call_llm(data)
@@ -194,7 +197,7 @@ def autocomplete():
                 'model': get_param('MODEL'),
                 'prompt': prompt,
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
-                'temperature': 0.7,
+                'temperature': float(get_param('TEMPERATURE')),
                 'stop': ['\n'] 
             }
             
@@ -223,7 +226,7 @@ def transform_text():
                 'model': get_param('MODEL'),
                 'prompt': prompt,
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
-                'temperature': 0.7
+                'temperature': float(get_param('TEMPERATURE'))
             }
             
             response = call_llm(data)
