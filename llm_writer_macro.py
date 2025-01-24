@@ -162,7 +162,7 @@ def _log_api_call(endpoint, request, response, status_code):
                 f.write(f"Error Details: {request['error']}\n")
             else:
                 f.write(f"Request: {request}\n")
-            f.write(f"Response: {response}\n")
+            f.write(f"Response: {response}\n") # log the body of the error too ai!
             f.write("-" * 40 + "\n")
 
 def get_api_logs(limit=100):
