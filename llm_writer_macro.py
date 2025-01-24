@@ -25,7 +25,7 @@ def init_db():
                     'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS': 'Continue the text naturally',
                     'CONTEXT_PREVIOUS_CHARS': '100',
                     'CONTEXT_NEXT_CHARS': '100'
-                }, f)
+                }, f, indent=4)
         
         # Initialize logs file
         if not os.path.exists(LOG_PATH):
@@ -60,12 +60,16 @@ def get_context(cursor):
         text = cursor.getText()
         prev_chars = int(get_param('CONTEXT_PREVIOUS_CHARS'))
         next_chars = int(get_param('CONTEXT_NEXT_CHARS'))
-        
-        start = max(0, int(cursor.getStart().Value) - prev_chars)
-        end = min(len(text.getString()), int(cursor.getEnd().Value) + next_chars)
-        
-        previous_context = text.getString()[start:cursor.getStart()]
-        next_context = text.getString()[cursor.getEnd():end]
+
+        text_cursor = cursor.getText().createTextCursorByRange(cursor)
+        text_cursor.goLeft(prev_chars, True)
+        previous_context = text_cursor.getString()
+
+        text_cursor = cursor.getText().createTextCursorByRange(cursor)
+        text_cursor.goRight(next_chars, True)
+        next_context = text_cursor.getString()
+
+        show_message(previous_context + next_context)
         
         return previous_context, next_context
 
@@ -81,7 +85,6 @@ def autocomplete(cursor):
                 'model': get_param('MODEL'),
                 'prompt': prompt,
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
-                'temperature': 0.7,
                 'stop': ['\n'] 
             }
             
@@ -90,10 +93,10 @@ def autocomplete(cursor):
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            error_msg = f"ERROR: {str(e)}\n\nMost recent traceback lines:\n" + "\\trace("\njoin("\\n.join(traceback.format_exc().splitlines()[-3:])
-            full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
-            show_message(error_msg) 
             _log_api_call("autocomplete", full_error, {}, 500)
+            error_msg = f"ERROR: {str(e)}"
+            full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
+            show_message(full_error) 
 
 def transform_text(cursor, instruction=None):
         """Transform selected text based on instruction"""
@@ -116,7 +119,10 @@ def transform_text(cursor, instruction=None):
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            show_message(f"Error: {str(e)}")
+            error_msg = f"ERROR: {str(e)}"
+            full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
+            show_message(full_error) 
+            _log_api_call("transform_text", full_error, {}, 500)
 
 def call_llm(data): 
         """Make API call to OpenAI-compatible endpoint"""
@@ -173,6 +179,7 @@ def _get_cursor():
         xModel = uno.getComponentContext().getServiceManager().createInstanceWithContext("com.sun.star.frame.Desktop", uno.getComponentContext()).getCurrentComponent()
         xSelectionSupplier = xModel.getCurrentController()
         xIndexAccess = xSelectionSupplier.getSelection()
+        show_message(xIndexAccess)
         return xIndexAccess.getByIndex(0)
 
 def autocomplete():
@@ -196,7 +203,9 @@ def autocomplete():
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            show_message(f"Error: {str(e)}")
+            error_msg = f"ERROR: {str(e)}"
+            full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
+            show_message(full_error) 
 
 def transform_text():
         """Transform selected text based on instruction"""
@@ -221,7 +230,9 @@ def transform_text():
                 cursor.setString(response['choices'][0]['text'])
                 
         except Exception as e:
-            show_message(f"Error: {str(e)}")
+            error_msg = f"ERROR: {str(e)}"
+            full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
+            show_message(full_error) 
 
 def show_logs():
         """Display API logs in message box"""
