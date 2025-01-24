@@ -160,11 +160,8 @@ def _log_api_call(endpoint, request, response, status_code):
             f.write(f"Timestamp: {datetime.datetime.now().isoformat()}\n")
             f.write(f"Endpoint: {endpoint}\n")
             f.write(f"Status Code: {status_code}\n")
-            if 'error' in request:
-                f.write(f"Error Details: {request['error']}\n")
-            else:
-                f.write(f"Request: {request}\n")
-            f.write(f"Response: {response} {response.text}\n")
+            f.write(f"Request: {request}\n")
+            f.write(f"Response: {response} \n")
             f.write("-" * 40 + "\n")
 
 def get_api_logs(limit=100):
@@ -202,7 +199,7 @@ def autocomplete():
             
             data = {
                 'model': get_param('MODEL'),
-                'prompt': prompt,
+                'prompt': prompt, # change it to messages ai!
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': float(get_param('TEMPERATURE')),
                 'stop': ['\n'] 
