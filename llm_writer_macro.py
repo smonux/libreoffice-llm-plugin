@@ -74,62 +74,6 @@ def get_context(cursor):
         
         return previous_context, next_context
 
-def autocomplete(cursor):
-        """Generate autocomplete suggestions using LLM"""
-        try:
-            previous_context, next_context = get_context(cursor)
-            
-            messages = [
-                {"role": "system", "content": get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')},
-                {"role": "user", "content": f"{previous_context}[COMPLETE HERE]{next_context}"}
-            ]
-            
-            data = {
-                'model': get_param('MODEL'),
-                'messages': messages,
-                'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
-                'temperature': float(get_param('TEMPERATURE')),
-                'stop': ['\n'] 
-            }
-            
-            response = call_llm(data)
-            if response:
-                cursor.setString(response['choices'][0]['content'])
-                
-        except Exception as e:
-            error_msg = f"ERROR: {str(e)}"
-            full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
-            _log_api_call("autocomplete", full_error, {}, 500)
-            show_message(full_error) 
-
-def transform_text(cursor, instruction=None):
-        """Transform selected text based on instruction"""
-        try:
-            selected_text = cursor.getString()
-            if not instruction:
-                instruction = "Do what's said in the Original text portion"
-                
-            messages = [
-                {"role": "system", "content": instruction},
-                {"role": "user", "content": f"Original text: {selected_text}\n\nTransformed text:"}
-            ]
-            
-            data = {
-                'model': get_param('MODEL'),
-                'messages': messages,
-                'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
-                'temperature': float(get_param('TEMPERATURE'))
-            }
-            
-            response = call_llm(data)
-            if response:
-                cursor.setString(response['choices'][0]['text'])
-                
-        except Exception as e:
-            error_msg = f"ERROR: {str(e)}"
-            full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
-            _log_api_call("transform_text", full_error, {}, 500)
-            show_message(full_error) 
 
 def call_llm(data): 
         """Make API call to OpenAI-compatible endpoint"""
@@ -207,7 +151,7 @@ def autocomplete():
             
             response = call_llm(data)
             if response:
-                cursor.setString(response['choices'][0]['text'])
+                cursor.setString(response['choices'][0]['message']['content'])
                 
         except Exception as e:
             error_msg = f"ERROR: {str(e)}"
@@ -236,7 +180,7 @@ def transform_text():
             
             response = call_llm(data)
             if response:
-                cursor.setString(response['choices'][0]['text'])
+                cursor.setString(response['choices'][0]['message']['content'])
                 
         except Exception as e:
             error_msg = f"ERROR: {str(e)}"
