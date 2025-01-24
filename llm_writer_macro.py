@@ -149,7 +149,9 @@ def call_llm(data):
                 _log_api_call(url, data, response_data, response.status)
                 return response_data
         except urllib.error.HTTPError as e:
-            _log_api_call(url, data, str(e), e.code)
+            # Read the response body to get the detailed error message
+            error_response = e.read().decode('utf-8')
+            _log_api_call(url, data, error_response, e.code)
             raise
 
 def _log_api_call(endpoint, request, response, status_code):
