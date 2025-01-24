@@ -79,12 +79,14 @@ def autocomplete(cursor):
         try:
             previous_context, next_context = get_context(cursor)
             
-            prompt = f"{previous_context}[COMPLETE HERE]{next_context}\n\n" + \
-                    get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')
+            messages = [
+                {"role": "system", "content": get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')},
+                {"role": "user", "content": f"{previous_context}[COMPLETE HERE]{next_context}"}
+            ]
             
             data = {
                 'model': get_param('MODEL'),
-                'prompt': prompt,
+                'messages': messages,
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': float(get_param('TEMPERATURE')),
                 'stop': ['\n'] 
@@ -107,11 +109,14 @@ def transform_text(cursor, instruction=None):
             if not instruction:
                 instruction = "Do what's said in the Original text portion"
                 
-            prompt = f"Original text: {selected_text}\n\nInstruction: {instruction}\n\nTransformed text:"
+            messages = [
+                {"role": "system", "content": instruction},
+                {"role": "user", "content": f"Original text: {selected_text}\n\nTransformed text:"}
+            ]
             
             data = {
                 'model': get_param('MODEL'),
-                'prompt': prompt,
+                'messages': messages,
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': float(get_param('TEMPERATURE'))
             }
