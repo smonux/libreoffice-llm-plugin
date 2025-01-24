@@ -70,7 +70,7 @@ def get_context(cursor):
         text_cursor.goRight(next_chars, True)
         next_context = text_cursor.getString()
 
-        show_message(previous_context + next_context)
+        #show_message(previous_context + next_context)
         
         return previous_context, next_context
 
@@ -162,7 +162,7 @@ def _log_api_call(endpoint, request, response, status_code):
                 f.write(f"Error Details: {request['error']}\n")
             else:
                 f.write(f"Request: {request}\n")
-            f.write(f"Response: {response}\n")
+            f.write(f"Response: {response} {response.text}\n")
             f.write("-" * 40 + "\n")
 
 def get_api_logs(limit=100):
