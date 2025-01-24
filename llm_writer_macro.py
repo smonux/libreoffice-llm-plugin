@@ -94,7 +94,7 @@ def autocomplete(cursor):
             
             response = call_llm(data)
             if response:
-                cursor.setString(response['choices'][0]['text'])
+                cursor.setString(response['choices'][0]['content'])
                 
         except Exception as e:
             error_msg = f"ERROR: {str(e)}"
