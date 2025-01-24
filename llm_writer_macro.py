@@ -158,9 +158,10 @@ def _log_api_call(endpoint, request, response, status_code):
             f.write("-" * 40 + "\n")
 
 def get_api_logs(limit=100):
-        """Retrieve API logs from JSON file"""
+        """Retrieve API logs from text file"""
         with open(LOG_PATH, 'r') as f:
-            return json.load(f)[:limit]  # this is not json format anymore ai
+            logs = f.readlines()[:limit]
+            return logs
 
 def show_message(message):
         """Show message dialog"""
@@ -234,26 +235,15 @@ def transform_text():
 
 def show_logs():
         """Display API logs in message box"""
-        logs = get_api_logs() # This doesn't return json anymore . change it to dump the lines ai!
+        logs = get_api_logs()
         if not logs:
             show_message("No API logs found")
             return
             
         log_text = "API Logs:\n\n"
         for log in logs:
-            log_id, timestamp, endpoint, request, response, status_code = log
-            log_text += f"[{timestamp}]\n"
-            log_text += f"Endpoint: {endpoint}\n"
-            log_text += f"Status: {status_code}\n"
-            
-            if 'error' in request:
-                log_text += f"Error Details:\n{request['error']}\n"
-            else:
-                log_text += f"Request: {json.dumps(request, indent=2)[:500]}...\n"
-                
-            log_text += f"Response: {json.dumps(response, indent=2)[:500]}...\n"
-            log_text += "-" * 40 + "\n"
-            
+            log_text += log + "\n"
+        
         show_message(log_text)
 
 def show_input_dialog(message):
