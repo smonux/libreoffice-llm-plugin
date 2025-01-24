@@ -191,6 +191,7 @@ def autocomplete():
                     get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')
             
             data = {
+                'model': get_param('MODEL'),
                 'prompt': prompt,
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': 0.7,
@@ -219,6 +220,7 @@ def transform_text():
             prompt = f"Original text: {selected_text}\n\nInstruction: {instruction}\n\nTransformed text:"
             
             data = {
+                'model': get_param('MODEL'),
                 'prompt': prompt,
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': 0.7
