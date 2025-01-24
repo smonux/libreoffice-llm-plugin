@@ -128,8 +128,8 @@ def transform_text(cursor, instruction=None):
         except Exception as e:
             error_msg = f"ERROR: {str(e)}"
             full_error = f"FULL ERROR: {str(e)}\n{traceback.format_exc()}"
-            show_message(full_error) 
             _log_api_call("transform_text", full_error, {}, 500)
+            show_message(full_error) 
 
 def call_llm(data): 
         """Make API call to OpenAI-compatible endpoint"""
@@ -161,7 +161,7 @@ def _log_api_call(endpoint, request, response, status_code):
             f.write(f"Endpoint: {endpoint}\n")
             f.write(f"Status Code: {status_code}\n")
             f.write(f"Request: {request}\n")
-            f.write(f"Response: {response} \n")
+            f.write(f"Response: {response}\n")
             f.write("-" * 40 + "\n")
 
 def get_api_logs(limit=100):
@@ -199,7 +199,10 @@ def autocomplete():
             
             data = {
                 'model': get_param('MODEL'),
-                'prompt': prompt, # change it to messages ai!
+                'messages': [
+                    {"role": "system", "content": get_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS')},
+                    {"role": "user", "content": prompt}
+                ],
                 'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
                 'temperature': float(get_param('TEMPERATURE')),
                 'stop': ['\n'] 
