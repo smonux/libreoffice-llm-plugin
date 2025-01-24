@@ -10,7 +10,7 @@ from com.sun.star.awt import MessageBoxButtons as MSG_BUTTONS
 import os
 
 PARAMS_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_params.json")
-LOG_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_api_logs.json")
+LOG_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_api_logs.log")
 
 def init_db():
         """Initialize JSON files for parameters and logs"""
@@ -21,8 +21,8 @@ def init_db():
                     'OPENAI_ENDPOINT': 'https://api.openai.com/v1/chat/completions',
                     'OPENAI_API_KEY': '',
                     'MODEL': 'gpt-4o-mini',
-                    'MAX_GENERATION_TOKENS': '100',
-                    'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS': 'Continue the text naturally',
+                    'MAX_GENERATION_TOKENS': '30',
+                    'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS': 'Continue the text naturally in the [COMPLETE] ',
                     'CONTEXT_PREVIOUS_CHARS': '100',
                     'CONTEXT_NEXT_CHARS': '100'
                 }, f, indent=4)
@@ -103,15 +103,14 @@ def transform_text(cursor, instruction=None):
         try:
             selected_text = cursor.getString()
             if not instruction:
-                instruction = selected_text
+                instruction = "Do what's said in the Original text portion"
                 
             prompt = f"Original text: {selected_text}\n\nInstruction: {instruction}\n\nTransformed text:"
             
             data = {
                 'model': get_param('MODEL'),
                 'prompt': prompt,
-                'max_tokens': int(get_param('MAX_GENERATION_TOKENS')),
-                'temperature': 0.7
+                'max_tokens': int(get_param('MAX_GENERATION_TOKENS'))
             }
             
             response = call_llm(data)
@@ -161,7 +160,7 @@ def _log_api_call(endpoint, request, response, status_code):
 def get_api_logs(limit=100):
         """Retrieve API logs from JSON file"""
         with open(LOG_PATH, 'r') as f:
-            return json.load(f)[:limit]
+            return json.load(f)[:limit]  # this is not json format anymore ai
 
 def show_message(message):
         """Show message dialog"""
@@ -179,7 +178,6 @@ def _get_cursor():
         xModel = uno.getComponentContext().getServiceManager().createInstanceWithContext("com.sun.star.frame.Desktop", uno.getComponentContext()).getCurrentComponent()
         xSelectionSupplier = xModel.getCurrentController()
         xIndexAccess = xSelectionSupplier.getSelection()
-        show_message(xIndexAccess)
         return xIndexAccess.getByIndex(0)
 
 def autocomplete():
@@ -236,7 +234,7 @@ def transform_text():
 
 def show_logs():
         """Display API logs in message box"""
-        logs = get_api_logs()
+        logs = get_api_logs() # This doesn't return json anymore . change it to dump the lines ai!
         if not logs:
             show_message("No API logs found")
             return
