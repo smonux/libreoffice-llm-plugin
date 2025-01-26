@@ -191,7 +191,7 @@ def transform_text():
 
 def show_logs():
         """Display API logs in message box"""
-        logs = get_api_logs()
+        logs = get_api_logs(25)
         if not logs:
             show_message("No API logs found")
             return
