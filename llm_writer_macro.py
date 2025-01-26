@@ -200,18 +200,66 @@ def show_logs():
         
         show_message(log_text)
 
-def show_input_dialog(message):
-        """Show input dialog"""
-        ctx = uno.getComponentContext()
-        sm = ctx.getServiceManager()
-        toolkit = sm.createInstanceWithContext(
-            "com.sun.star.awt.Toolkit", ctx)
-        dialog = toolkit.createInputBox()
-        dialog.setTitle("LLM Writer")
-        dialog.setMessageText(message)
-        if dialog.execute():
-            return dialog.getValue()
-        return None
+ def show_input_dialog(message):
+     """Show input dialog"""
+     ctx = uno.getComponentContext()
+     sm = ctx.getServiceManager()
+     toolkit = sm.createInstanceWithContext(
+         "com.sun.star.awt.Toolkit", ctx)
+
+     # Create a dialog model
+     dialog_model = toolkit.createUnoControlDialogModel()
+     dialog_model.Width = 200
+     dialog_model.Height = 100
+     dialog_model.Title = "LLM Writer"
+
+     # Add a text field
+     text_field_model = dialog_model.createInstance("com.sun.star.awt.UnoControlEditModel")
+     text_field_model.Name = "TextField"
+     text_field_model.PositionX = 10
+     text_field_model.PositionY = 20
+     text_field_model.Width = 180
+     text_field_model.Height = 10
+     dialog_model.insertByName("TextField", text_field_model)
+
+     # Add a label
+     label_model = dialog_model.createInstance("com.sun.star.awt.UnoControlFixedTextModel")
+     label_model.Name = "Label"
+     label_model.PositionX = 10
+     label_model.PositionY = 5
+     label_model.Width = 180
+     label_model.Height = 10
+     label_model.Label = message
+     dialog_model.insertByName("Label", label_model)
+
+     # Add an OK button
+     ok_button_model = dialog_model.createInstance("com.sun.star.awt.UnoControlButtonModel")
+     ok_button_model.Name = "OKButton"
+     ok_button_model.PositionX = 60
+     ok_button_model.PositionY = 40
+     ok_button_model.Width = 80
+     ok_button_model.Height = 15
+     ok_button_model.Label = "OK"
+     dialog_model.insertByName("OKButton", ok_button_model)
+
+     # Create the dialog
+     dialog = toolkit.createUnoControlDialog(dialog_model)
+
+     # Event handler for the OK button
+     def button_action_handler(event):
+         dialog.endExecute(1)
+
+     ok_button = dialog.getControl("OKButton")
+     ok_button.addActionListener(lambda x: button_action_handler(x))
+
+     # Show the dialog
+     dialog.execute()
+
+     # Get the text from the text field
+     text_field = dialog.getControl("TextField")
+     return text_field.Text if dialog.getResult() == 1 else None
+
+
 
 # Export the macros properly
 init_db()
