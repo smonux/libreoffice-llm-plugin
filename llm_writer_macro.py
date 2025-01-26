@@ -205,6 +205,7 @@ def transform_text():
 
         cursor = _get_cursor()
         selected_text = cursor.getString()
+        previous_context, next_context = get_context(cursor)
 
         if not selected_text:
             return
@@ -219,7 +220,10 @@ def transform_text():
                 {"role": "system", "content": instruction},
                 {
                     "role": "user",
-                    "content": f"Original text: {selected_text}\n\nTransformed text:",
+                    "content": f"Previous context: {previous_context}\n"
+                              f"Original text: {selected_text}\n"
+                              f"Next context: {next_context}\n\n"
+                              f"Transformed text:",
                 },
             ],
             "temperature": float(get_param("TEMPERATURE")),
