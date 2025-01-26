@@ -158,6 +158,12 @@ def _get_cursor():
 def autocomplete():
     """Generate autocomplete suggestions using LLM"""
     try:
+        # Check if API key is set
+        api_key = get_param("OPENAI_API_KEY")
+        if not api_key:
+            modify_config()
+            return
+
         cursor = _get_cursor()
         previous_context, next_context = get_context(cursor)
 
@@ -191,6 +197,12 @@ def autocomplete():
 def transform_text():
     """Transform selected text based on instruction"""
     try:
+        # Check if API key is set
+        api_key = get_param("OPENAI_API_KEY")
+        if not api_key:
+            modify_config()
+            return
+
         cursor = _get_cursor()
         selected_text = cursor.getString()
 
