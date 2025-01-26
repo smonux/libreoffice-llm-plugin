@@ -202,6 +202,94 @@ def show_logs():
         
         show_message(log_text)
 
+def modify_config():
+    """Show configuration dialog to modify parameters"""
+    WIDTH = 600
+    HEIGHT = 400
+    HORI_MARGIN = VERT_MARGIN = 8
+    BUTTON_WIDTH = 100
+    BUTTON_HEIGHT = 26
+    HORI_SEP = VERT_SEP = 8
+    LABEL_WIDTH = 200
+    EDIT_WIDTH = WIDTH - LABEL_WIDTH - HORI_MARGIN * 2 - HORI_SEP
+    ROW_HEIGHT = 24
+    ROW_SPACING = 4
+    
+    # Load current parameters
+    with open(PARAMS_PATH, 'r') as f:
+        params = json.load(f)
+    
+    # Create dialog
+    ctx = uno.getComponentContext()
+    def create(name):
+        return ctx.getServiceManager().createInstanceWithContext(name, ctx)
+    
+    dialog = create("com.sun.star.awt.UnoControlDialog")
+    dialog_model = create("com.sun.star.awt.UnoControlDialogModel")
+    dialog.setModel(dialog_model)
+    dialog.setVisible(False)
+    dialog.setTitle("Modify Configuration")
+    dialog.setPosSize(0, 0, WIDTH, HEIGHT, SIZE)
+    
+    # Function to add controls
+    def add(name, type, x_, y_, width_, height_, props):
+        model = dialog_model.createInstance("com.sun.star.awt.UnoControl" + type + "Model")
+        dialog_model.insertByName(name, model)
+        control = dialog.getControl(name)
+        control.setPosSize(x_, y_, width_, height_, POSSIZE)
+        for key, value in props.items():
+            setattr(model, key, value)
+    
+    # Add parameter fields
+    y_pos = VERT_MARGIN
+    for i, (key, value) in enumerate(params.items()):
+        # Add label
+        add(f"label_{i}", "FixedText", HORI_MARGIN, y_pos, LABEL_WIDTH, ROW_HEIGHT,
+            {"Label": key, "NoLabel": True})
+        
+        # Add edit field
+        add(f"edit_{i}", "Edit", HORI_MARGIN + LABEL_WIDTH + HORI_SEP, y_pos, EDIT_WIDTH, ROW_HEIGHT,
+            {"Text": str(value)})
+        
+        y_pos += ROW_HEIGHT + ROW_SPACING
+    
+    # Add buttons
+    add("btn_ok", "Button", WIDTH - BUTTON_WIDTH - HORI_MARGIN, y_pos, BUTTON_WIDTH, BUTTON_HEIGHT,
+        {"PushButtonType": OK, "DefaultButton": True})
+    add("btn_cancel", "Button", WIDTH - BUTTON_WIDTH * 2 - HORI_MARGIN - HORI_SEP, y_pos, BUTTON_WIDTH, BUTTON_HEIGHT,
+        {"PushButtonType": CANCEL})
+    
+    # Position dialog
+    frame = create("com.sun.star.frame.Desktop").getCurrentFrame()
+    window = frame.getContainerWindow() if frame else None
+    dialog.createPeer(create("com.sun.star.awt.Toolkit"), window)
+    if window:
+        ps = window.getPosSize()
+        _x = ps.Width / 2 - WIDTH / 2
+        _y = ps.Height / 2 - HEIGHT / 2
+        dialog.setPosSize(_x, _y, 0, 0, POS)
+    
+    # Show dialog and process results
+    if dialog.execute():
+        # Update parameters with new values
+        for i, key in enumerate(params.keys()):
+            edit = dialog.getControl(f"edit_{i}")
+            params[key] = edit.getModel().Text
+        
+        # Save updated parameters
+        set_param('OPENAI_ENDPOINT', params['OPENAI_ENDPOINT'])
+        set_param('OPENAI_API_KEY', params['OPENAI_API_KEY'])
+        set_param('MODEL', params['MODEL'])
+        set_param('MAX_GENERATION_TOKENS', params['MAX_GENERATION_TOKENS'])
+        set_param('AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS', params['AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS'])
+        set_param('CONTEXT_PREVIOUS_CHARS', params['CONTEXT_PREVIOUS_CHARS'])
+        set_param('CONTEXT_NEXT_CHARS', params['CONTEXT_NEXT_CHARS'])
+        set_param('TEMPERATURE', params['TEMPERATURE'])
+        
+        show_message("Configuration updated successfully!")
+    
+    dialog.dispose()
+
 def show_input_dialog(message, title="", default="", x=None, y=None):
     """ Shows dialog with input box.
         @param message message to show on the dialog
