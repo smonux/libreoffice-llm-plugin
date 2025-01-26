@@ -309,15 +309,29 @@ def modify_config():
         )
 
         # Add edit field
-        add(
-            f"edit_{i}",
-            "Edit",
-            HORI_MARGIN + LABEL_WIDTH + HORI_SEP,
-            y_pos,
-            EDIT_WIDTH,
-            ROW_HEIGHT + 30*(key == 'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS'),
-            {"Text": str(value)},
-        )
+        if key == "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS":
+            add(
+                f"edit_{i}",
+                "Edit",
+                HORI_MARGIN + LABEL_WIDTH + HORI_SEP,
+                y_pos,
+                EDIT_WIDTH,
+                ROW_HEIGHT + 30, 
+                { "MultiLine": True, "Text": str(value),
+                 "VScroll": True},
+            )
+        else:
+            add(
+                f"edit_{i}",
+                "Edit",
+                HORI_MARGIN + LABEL_WIDTH + HORI_SEP,
+                y_pos,
+                EDIT_WIDTH,
+                ROW_HEIGHT, 
+                {  "Text": str(value)},
+            )
+
+
 
         y_pos += ROW_HEIGHT + ROW_SPACING
 
