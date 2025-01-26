@@ -200,66 +200,62 @@ def show_logs():
         
         show_message(log_text)
 
- def show_input_dialog(message):
-     """Show input dialog"""
-     ctx = uno.getComponentContext()
-     sm = ctx.getServiceManager()
-     toolkit = sm.createInstanceWithContext(
-         "com.sun.star.awt.Toolkit", ctx)
+def show_input_dialog(message):
+    """Show input dialog"""
+    ctx = uno.getComponentContext()
+    sm = ctx.getServiceManager()
 
-     # Create a dialog model
-     dialog_model = toolkit.createUnoControlDialogModel()
-     dialog_model.Width = 200
-     dialog_model.Height = 100
-     dialog_model.Title = "LLM Writer"
+    # Create a dialog model
+    dialog_model = sm.createInstanceWithContext(
+        "com.sun.star.awt.UnoControlDialogModel", ctx)
+    dialog_model.Width = 200
+    dialog_model.Height = 100
+    dialog_model.Title = "LLM Writer"
 
-     # Add a text field
-     text_field_model = dialog_model.createInstance("com.sun.star.awt.UnoControlEditModel")
-     text_field_model.Name = "TextField"
-     text_field_model.PositionX = 10
-     text_field_model.PositionY = 20
-     text_field_model.Width = 180
-     text_field_model.Height = 10
-     dialog_model.insertByName("TextField", text_field_model)
+    # Add a text field
+    text_field_model = sm.createInstanceWithContext(
+        "com.sun.star.awt.UnoControlEditModel", ctx)
+    text_field_model.setPropertyValue("Name", "TextField")  # Set the Name property
+    text_field_model.setPropertyValue("Width", 180)
+    text_field_model.setPropertyValue("Height", 10)
+    dialog_model.insertByName("TextField", text_field_model)
 
-     # Add a label
-     label_model = dialog_model.createInstance("com.sun.star.awt.UnoControlFixedTextModel")
-     label_model.Name = "Label"
-     label_model.PositionX = 10
-     label_model.PositionY = 5
-     label_model.Width = 180
-     label_model.Height = 10
-     label_model.Label = message
-     dialog_model.insertByName("Label", label_model)
+    # Add a label
+    label_model = sm.createInstanceWithContext(
+        "com.sun.star.awt.UnoControlFixedTextModel", ctx)
+    label_model.setPropertyValue("Name", "Label")  # Set the Name property
+    label_model.setPropertyValue("Width", 180)
+    label_model.setPropertyValue("Height", 10)
+    label_model.setPropertyValue("Label", message)  # Set the Label property
+    dialog_model.insertByName("Label", label_model)
 
-     # Add an OK button
-     ok_button_model = dialog_model.createInstance("com.sun.star.awt.UnoControlButtonModel")
-     ok_button_model.Name = "OKButton"
-     ok_button_model.PositionX = 60
-     ok_button_model.PositionY = 40
-     ok_button_model.Width = 80
-     ok_button_model.Height = 15
-     ok_button_model.Label = "OK"
-     dialog_model.insertByName("OKButton", ok_button_model)
+    # Add an OK button
+    ok_button_model = sm.createInstanceWithContext(
+        "com.sun.star.awt.UnoControlButtonModel", ctx)
+    ok_button_model.setPropertyValue("Name", "OKButton")  # Set the Name property
+    ok_button_model.setPropertyValue("Width", 80)
+    ok_button_model.setPropertyValue("Height", 15)
+    ok_button_model.setPropertyValue("Label", "OK")  # Set the Label property
+    dialog_model.insertByName("OKButton", ok_button_model)
 
-     # Create the dialog
-     dialog = toolkit.createUnoControlDialog(dialog_model)
+    # Create the dialog
+    dialog = sm.createInstanceWithContext(
+        "com.sun.star.awt.UnoControlDialog", ctx)
 
-     # Event handler for the OK button
-     def button_action_handler(event):
-         dialog.endExecute(1)
+    dialog.setModel(dialog_model)
+    # Event handler for the OK button
+    def button_action_handler(event):
+        dialog.endExecute(1)
 
-     ok_button = dialog.getControl("OKButton")
-     ok_button.addActionListener(lambda x: button_action_handler(x))
+    ok_button = dialog.getControl("OKButton")
+    ok_button.addActionListener(lambda x: button_action_handler(x))
 
-     # Show the dialog
-     dialog.execute()
+    # Show the dialog
+    dialog.execute()
 
-     # Get the text from the text field
-     text_field = dialog.getControl("TextField")
-     return text_field.Text if dialog.getResult() == 1 else None
-
-
+    # Get the text from the text field
+    text_field = dialog.getControl("TextField")
+    return text_field.getText() if dialog.getResult() == 1 else None
 
 # Export the macros properly
 init_db()
