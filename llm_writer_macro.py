@@ -334,5 +334,5 @@ def XXXXshow_input_dialog(message):
 
 # Export the macros properly
 init_db()
-g_exportedScripts = (autocomplete, transform_text, show_logs)
+g_exportedScripts = (autocomplete, transform_text, show_logs, modify_config)
 
