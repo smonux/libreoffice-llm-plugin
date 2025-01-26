@@ -7,6 +7,8 @@ import json
 import traceback
 from com.sun.star.task import XJobExecutor
 from com.sun.star.awt import MessageBoxButtons as MSG_BUTTONS
+from com.sun.star.awt.PosSize import POS, SIZE, POSSIZE
+from com.sun.star.awt.PushButtonType import OK, CANCEL
 from msgbox import MsgBox 
 import os
 
