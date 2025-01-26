@@ -210,6 +210,8 @@ def transform_text():
             return
 
         instruction = show_input_dialog("Enter transformation instructions:")
+        if not instruction:
+            instruction = "Perform the task present after the 'Original Text:'"
 
         data = {
             "model": get_param("MODEL"),
@@ -220,7 +222,6 @@ def transform_text():
                     "content": f"Original text: {selected_text}\n\nTransformed text:",
                 },
             ],
-            "max_tokens": int(get_param("MAX_GENERATION_TOKENS")),
             "temperature": float(get_param("TEMPERATURE")),
         }
 
@@ -310,7 +311,7 @@ def modify_config():
             HORI_MARGIN + LABEL_WIDTH + HORI_SEP,
             y_pos,
             EDIT_WIDTH,
-            ROW_HEIGHT,
+            ROW_HEIGHT + 30*(key == 'AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS'),
             {"Text": str(value)},
         )
 
