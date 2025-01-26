@@ -211,31 +211,39 @@ def show_input_dialog(message):
     dialog_model.Width = 200
     dialog_model.Height = 100
     dialog_model.Title = "LLM Writer"
+    dialog_model.PositionX = 100
+    dialog_model.PositionY = 100
 
     # Add a text field
     text_field_model = sm.createInstanceWithContext(
         "com.sun.star.awt.UnoControlEditModel", ctx)
-    text_field_model.setPropertyValue("Name", "TextField")  # Set the Name property
+    text_field_model.setPropertyValue("Name", "TextField")
+    text_field_model.setPropertyValue("PositionX", 10)
+    text_field_model.setPropertyValue("PositionY", 40)
     text_field_model.setPropertyValue("Width", 180)
-    text_field_model.setPropertyValue("Height", 10)
+    text_field_model.setPropertyValue("Height", 20)
     dialog_model.insertByName("TextField", text_field_model)
 
     # Add a label
     label_model = sm.createInstanceWithContext(
         "com.sun.star.awt.UnoControlFixedTextModel", ctx)
-    label_model.setPropertyValue("Name", "Label")  # Set the Name property
+    label_model.setPropertyValue("Name", "Label")
+    label_model.setPropertyValue("PositionX", 10)
+    label_model.setPropertyValue("PositionY", 10)
     label_model.setPropertyValue("Width", 180)
-    label_model.setPropertyValue("Height", 10)
-    label_model.setPropertyValue("Label", message)  # Set the Label property
+    label_model.setPropertyValue("Height", 20)
+    label_model.setPropertyValue("Label", message)
     dialog_model.insertByName("Label", label_model)
 
     # Add an OK button
     ok_button_model = sm.createInstanceWithContext(
         "com.sun.star.awt.UnoControlButtonModel", ctx)
-    ok_button_model.setPropertyValue("Name", "OKButton")  # Set the Name property
+    ok_button_model.setPropertyValue("Name", "OKButton")
+    ok_button_model.setPropertyValue("PositionX", 60)
+    ok_button_model.setPropertyValue("PositionY", 70)
     ok_button_model.setPropertyValue("Width", 80)
-    ok_button_model.setPropertyValue("Height", 15)
-    ok_button_model.setPropertyValue("Label", "OK")  # Set the Label property
+    ok_button_model.setPropertyValue("Height", 20)
+    ok_button_model.setPropertyValue("Label", "OK")
     dialog_model.insertByName("OKButton", ok_button_model)
 
     # Create the dialog
