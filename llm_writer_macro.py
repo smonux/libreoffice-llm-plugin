@@ -15,6 +15,20 @@ import os
 PARAMS_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_params.json")
 LOG_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_api_logs.log")
 
+AUTOCOMPLETE_DEFAULT_PROMPT="""
+Continue the text naturally at the [COMPLETE HERE] position using the surrounding context.
+
+Maintain consistent style/tone and preserve narrative flow.
+
+Generate only the next logical sequence of words without repeating existing content. 
+
+Prioritize grammatical correctness and contextual coherence with both preceding and following text.
+
+Respect punctuacion and write consistently with it
+
+Use the same language the text is written on.
+
+"""
 
 def init_db():
     """Initialize JSON files for parameters and logs"""
@@ -26,8 +40,8 @@ def init_db():
                     "OPENAI_ENDPOINT": "https://api.openai.com/v1/chat/completions",
                     "OPENAI_API_KEY": "",
                     "MODEL": "gpt-4o-mini",
-                    "MAX_GENERATION_TOKENS": "30",
-                    "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS": "Continue the text naturally in the [COMPLETE] ",
+                    "MAX_GENERATION_WORDS": "30",
+                    "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS": AUTOCOMPLETE_DEFAULT_PROMPT,
                     "CONTEXT_PREVIOUS_CHARS": "100",
                     "CONTEXT_NEXT_CHARS": "100",
                     "TEMPERATURE": "0.7",
@@ -167,6 +181,8 @@ def autocomplete():
         cursor = _get_cursor()
         previous_context, next_context = get_context(cursor)
 
+        max_words_prompt = f"\nGenerate at most {get_param('MAX_GENERATION_WORDS')} words\n"
+
         data = {
             "model": get_param("MODEL"),
             "messages": [
@@ -179,9 +195,8 @@ def autocomplete():
                     "content": f"{previous_context}[COMPLETE HERE]{next_context}",
                 },
             ],
-            "max_tokens": int(get_param("MAX_GENERATION_TOKENS")),
             "temperature": float(get_param("TEMPERATURE")),
-            "stop": ["\n"],
+            "max_tokens" : int(get_param("MAX_GENERATION_WORDS")) * 4
         }
 
         response = call_llm(data)
@@ -376,7 +391,7 @@ def modify_config():
         set_param("OPENAI_ENDPOINT", params["OPENAI_ENDPOINT"])
         set_param("OPENAI_API_KEY", params["OPENAI_API_KEY"])
         set_param("MODEL", params["MODEL"])
-        set_param("MAX_GENERATION_TOKENS", params["MAX_GENERATION_TOKENS"])
+        set_param("MAX_GENERATION_WORDS", params["MAX_GENERATION_WORDS"])
         set_param(
             "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS",
             params["AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS"],
@@ -405,7 +420,7 @@ def show_input_dialog(message, title="", default="", x=None, y=None):
     BUTTON_HEIGHT = 26
     HORI_SEP = VERT_SEP = 8
     LABEL_HEIGHT = BUTTON_HEIGHT * 2 + 5
-    EDIT_HEIGHT = 24
+    EDIT_HEIGHT = 70
     HEIGHT = VERT_MARGIN * 2 + LABEL_HEIGHT + VERT_SEP + EDIT_HEIGHT
     import uno
     from com.sun.star.awt.PosSize import POS, SIZE, POSSIZE
@@ -469,7 +484,8 @@ def show_input_dialog(message, title="", default="", x=None, y=None):
         LABEL_HEIGHT + VERT_MARGIN + VERT_SEP,
         WIDTH - HORI_MARGIN * 2,
         EDIT_HEIGHT,
-        {"Text": str(default)},
+        { "MultiLine": True, "Text": str(default),
+                 "VScroll": True},
     )
     frame = create("com.sun.star.frame.Desktop").getCurrentFrame()
     window = frame.getContainerWindow() if frame else None
