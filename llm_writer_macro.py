@@ -39,8 +39,8 @@ def init_db():
                 {
                     "OPENAI_ENDPOINT": "https://api.openai.com/v1/chat/completions",
                     "OPENAI_API_KEY": "",
-                    "MODEL": "gpt-4o-mini",
-                    "MAX_GENERATION_WORDS": "30",
+                    "MODEL": "gpt-4o",
+                    "MAX_GENERATION_WORDS": "10",
                     "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS": AUTOCOMPLETE_DEFAULT_PROMPT,
                     "CONTEXT_PREVIOUS_CHARS": "100",
                     "CONTEXT_NEXT_CHARS": "100",
