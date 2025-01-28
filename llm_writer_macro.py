@@ -17,15 +17,10 @@ LOG_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_api_logs.log")
 
 AUTOCOMPLETE_DEFAULT_PROMPT="""
 Continue the text naturally at the [COMPLETE HERE] position using the surrounding context.
-
 Maintain consistent style/tone and preserve narrative flow.
-
 Generate only the next logical sequence of words without repeating existing content. 
-
 Prioritize grammatical correctness and contextual coherence with both preceding and following text.
-
-Respect punctuacion and write consistently with it
-
+Respect punctuacion and write consistently with best practices (for example: space and first letter of first word capitalized). 
 Use the same language the text is written on.
 
 """
@@ -126,7 +121,7 @@ def call_llm(data):
 
 def _log_api_call(endpoint, request, response, status_code):
     """Log API call details to a regular text file"""
-    with open(LOG_PATH, "a") as f:
+    with open(LOG_PATH, "a", encoding="utf-8") as f:
         f.write(f"Timestamp: {datetime.datetime.now().isoformat()}\n")
         f.write(f"Endpoint: {endpoint}\n")
         f.write(f"Status Code: {status_code}\n")
