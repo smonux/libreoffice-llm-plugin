@@ -132,7 +132,7 @@ def _log_api_call(endpoint, request, response, status_code):
 
 def get_api_logs(limit=100):
     """Retrieve API logs from text file"""
-    with open(LOG_PATH, "r") as f:
+    with open(LOG_PATH, "r", "utf-8") as f:
         logs = f.readlines()[:limit]
         return logs
 
