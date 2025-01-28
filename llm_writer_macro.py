@@ -244,9 +244,9 @@ def transform_text(*args):
         response = call_llm(data)
         if response:
             if keep_original:
-                cursor.setString(selected_text + "\n\n" +  response["choices"][0]["message"]["content"])
+                cursor.setString(selected_text + "\n\n\u21a6" +  response["choices"][0]["message"]["content"] + "\u21a4")
             else:
-                cursor.setString(response["choices"][0]["message"]["content"])
+                cursor.setString("\u21a6" + response["choices"][0]["message"]["content"] + "\u21a4")
 
     except Exception as e:
         error_msg = f"ERROR: {str(e)}"
