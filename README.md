@@ -79,7 +79,21 @@
  - Verify your API key is correct
  - Ensure you have an active internet connection
  - Make sure the macro file is in the correct directory
-# Add reference to the files for configuration and logs, where are they placed and their purpose ai!
+## Configuration and Log Files
+
+The macro uses two files stored in the user's home directory:
+
+1. **llm_writer_params.json**  
+   Location: `~/llm_writer_params.json`  
+   Purpose: Stores all configuration parameters including API key, model settings, and prompt templates.  
+   Format: JSON file that can be manually edited if needed.
+
+2. **llm_writer_api_logs.log**  
+   Location: `~/llm_writer_api_logs.log`  
+   Purpose: Logs all API calls made by the macro including requests, responses, and timestamps.  
+   Format: Plain text file that can be viewed with any text editor.
+
+These files are automatically created when the macro is first run. The configuration file can be modified either through the macro's configuration dialog or by directly editing the JSON file.
 
  ## License
 
