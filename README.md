@@ -79,7 +79,8 @@
  - Verify your API key is correct
  - Ensure you have an active internet connection
  - Make sure the macro file is in the correct directory
-## Configuration and Log Files
+
+ ## Configuration and Log Files
 
 The macro uses two files stored in the user's home directory:
 
@@ -90,6 +91,7 @@ The macro uses two files stored in the user's home directory:
 
 2. **llm_writer_api_logs.log**  
    Location: `~/llm_writer_api_logs.log`  
+   # add where the location is in windows for both files ai!
    Purpose: Logs all API calls made by the macro including requests, responses, and timestamps.  
    Format: Plain text file that can be viewed with any text editor.
 
