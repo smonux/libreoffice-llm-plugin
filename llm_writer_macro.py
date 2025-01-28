@@ -22,7 +22,7 @@ Generate only the next logical sequence of words without repeating existing cont
 Prioritize grammatical correctness and contextual coherence with both preceding and following text.
 Respect punctuacion and write consistently with best practices (for example: space and first letter of first word capitalized). 
 Use the same language the text is written on.
-
+Don't announce what you are going to do, just do it (e.g: here you have, etc..).
 """
 
 def init_db():
