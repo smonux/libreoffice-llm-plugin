@@ -85,13 +85,16 @@
 The macro uses two files stored in the user's home directory:
 
 1. **llm_writer_params.json**  
-   Location: `~/llm_writer_params.json`  
+   Location:  
+     - Linux/macOS: `~/llm_writer_params.json`  
+     - Windows: `%USERPROFILE%\llm_writer_params.json`  
    Purpose: Stores all configuration parameters including API key, model settings, and prompt templates.  
    Format: JSON file that can be manually edited if needed.
 
 2. **llm_writer_api_logs.log**  
-   Location: `~/llm_writer_api_logs.log`  
-   # add where the location is in windows for both files ai!
+   Location:  
+     - Linux/macOS: `~/llm_writer_api_logs.log`  
+     - Windows: `%USERPROFILE%\llm_writer_api_logs.log`  
    Purpose: Logs all API calls made by the macro including requests, responses, and timestamps.  
    Format: Plain text file that can be viewed with any text editor.
 
