@@ -15,7 +15,7 @@ import os
 PARAMS_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_params.json")
 LOG_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_api_logs.log")
 
-AUTOCOMPLETE_DEFAULT_PROMPT="""
+AUTOCOMPLETE_DEFAULT_PROMPT = """
 Continue the text naturally at the [COMPLETE HERE] position using the surrounding context.
 Maintain consistent style/tone and preserve narrative flow.
 Generate only the next logical sequence of words without repeating existing content. 
@@ -24,6 +24,7 @@ Respect punctuacion and write consistently with best practices (for example: spa
 Use the same language the text is written on.
 Don't announce what you are going to do, just do it (e.g: here you have, etc..).
 """
+
 
 def init_db():
     """Initialize JSON files for parameters and logs"""
@@ -122,9 +123,9 @@ def call_llm(data):
 def _log_api_call(endpoint, request, response, status_code):
     """Log API call details to a regular text file"""
     with open(LOG_PATH, "a", encoding="utf-8") as f:
-        f.write(f"Timestamp: {datetime.datetime.now().isoformat()}\n")
-        f.write(f"Endpoint: {endpoint}\n")
-        f.write(f"Status Code: {status_code}\n")
+        f.write(
+            f"Timestamp: {datetime.datetime.now().isoformat()}\n Endpoint: {endpoint} Status Code: {status_code}\n"
+        )
         f.write(f"Request: {request}\n")
         f.write(f"Response: {response}\n")
         f.write("-" * 40 + "\n")
@@ -176,7 +177,9 @@ def autocomplete(*args):
         cursor = _get_cursor()
         previous_context, next_context = get_context(cursor)
 
-        max_words_prompt = f"\nGenerate at most {get_param('MAX_GENERATION_WORDS')} words\n"
+        max_words_prompt = (
+            f"\nGenerate at most {get_param('MAX_GENERATION_WORDS')} words\n"
+        )
 
         data = {
             "model": get_param("MODEL"),
@@ -191,7 +194,7 @@ def autocomplete(*args):
                 },
             ],
             "temperature": float(get_param("TEMPERATURE")),
-            "max_tokens" : int(get_param("MAX_GENERATION_WORDS")) * 4
+            "max_tokens": int(get_param("MAX_GENERATION_WORDS")) * 4,
         }
 
         response = call_llm(data)
@@ -233,9 +236,9 @@ def transform_text(*args):
                 {
                     "role": "user",
                     "content": f"Previous context: {previous_context}\n"
-                              f"Original text: {selected_text}\n"
-                              f"Next context: {next_context}\n\n"
-                              f"Transformed text:",
+                    f"Original text: {selected_text}\n"
+                    f"Next context: {next_context}\n\n"
+                    f"Transformed text:",
                 },
             ],
             "temperature": float(get_param("TEMPERATURE")),
@@ -244,9 +247,16 @@ def transform_text(*args):
         response = call_llm(data)
         if response:
             if keep_original:
-                cursor.setString(selected_text + "\n\n\u21a6" +  response["choices"][0]["message"]["content"] + "\u21a4")
+                cursor.setString(
+                    selected_text
+                    + "\n\n\u21a6"
+                    + response["choices"][0]["message"]["content"]
+                    + "\u21a4"
+                )
             else:
-                cursor.setString("\u21a6" + response["choices"][0]["message"]["content"] + "\u21a4")
+                cursor.setString(
+                    "\u21a6" + response["choices"][0]["message"]["content"] + "\u21a4"
+                )
 
     except Exception as e:
         error_msg = f"ERROR: {str(e)}"
@@ -324,29 +334,15 @@ def modify_config(*args):
         )
 
         # Add edit field
-        if key == "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS":
-            add(
-                f"edit_{i}",
-                "Edit",
-                HORI_MARGIN + LABEL_WIDTH + HORI_SEP,
-                y_pos,
-                EDIT_WIDTH,
-                ROW_HEIGHT + 30, 
-                { "MultiLine": True, "Text": str(value),
-                 "VScroll": True},
-            )
-        else:
-            add(
-                f"edit_{i}",
-                "Edit",
-                HORI_MARGIN + LABEL_WIDTH + HORI_SEP,
-                y_pos,
-                EDIT_WIDTH,
-                ROW_HEIGHT, 
-                {  "Text": str(value)},
-            )
-
-
+        add(
+            f"edit_{i}",
+            "Edit",
+            HORI_MARGIN + LABEL_WIDTH + HORI_SEP,
+            y_pos,
+            EDIT_WIDTH,
+            ROW_HEIGHT + 30,
+            {"MultiLine": True, "Text": str(value), "VScroll": True},
+        )
 
         y_pos += ROW_HEIGHT + ROW_SPACING
 
@@ -392,13 +388,13 @@ def modify_config(*args):
         set_param("OPENAI_API_KEY", params["OPENAI_API_KEY"])
         set_param("MODEL", params["MODEL"])
         set_param("MAX_GENERATION_WORDS", params["MAX_GENERATION_WORDS"])
+        set_param("CONTEXT_PREVIOUS_CHARS", params["CONTEXT_PREVIOUS_CHARS"])
+        set_param("CONTEXT_NEXT_CHARS", params["CONTEXT_NEXT_CHARS"])
+        set_param("TEMPERATURE", params["TEMPERATURE"])
         set_param(
             "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS",
             params["AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS"],
         )
-        set_param("CONTEXT_PREVIOUS_CHARS", params["CONTEXT_PREVIOUS_CHARS"])
-        set_param("CONTEXT_NEXT_CHARS", params["CONTEXT_NEXT_CHARS"])
-        set_param("TEMPERATURE", params["TEMPERATURE"])
 
         show_message("Configuration updated successfully!")
 
@@ -484,8 +480,7 @@ def show_input_dialog(message, title="", default="", x=None, y=None):
         LABEL_HEIGHT + VERT_MARGIN + VERT_SEP,
         WIDTH - HORI_MARGIN * 2,
         EDIT_HEIGHT,
-        { "MultiLine": True, "Text": str(default),
-                 "VScroll": True},
+        {"MultiLine": True, "Text": str(default), "VScroll": True},
     )
     frame = create("com.sun.star.frame.Desktop").getCurrentFrame()
     window = frame.getContainerWindow() if frame else None
@@ -510,7 +505,9 @@ def show_input_dialog(message, title="", default="", x=None, y=None):
     return ret
 
 
-def show_input_dialog_with_checkbox(message, checkbox_label, checkbox_default, title="", default="", x=None, y=None):
+def show_input_dialog_with_checkbox(
+    message, checkbox_label, checkbox_default, title="", default="", x=None, y=None
+):
     """Shows dialog with input box and a checkbox.
     @param message message to show on the dialog
     @param checkbox_label label for the checkbox
@@ -529,7 +526,14 @@ def show_input_dialog_with_checkbox(message, checkbox_label, checkbox_default, t
     LABEL_HEIGHT = BUTTON_HEIGHT * 2 + 5
     EDIT_HEIGHT = 70
     CHECKBOX_HEIGHT = 24
-    HEIGHT = VERT_MARGIN * 2 + LABEL_HEIGHT + VERT_SEP + EDIT_HEIGHT + VERT_SEP + CHECKBOX_HEIGHT
+    HEIGHT = (
+        VERT_MARGIN * 2
+        + LABEL_HEIGHT
+        + VERT_SEP
+        + EDIT_HEIGHT
+        + VERT_SEP
+        + CHECKBOX_HEIGHT
+    )
     import uno
     from com.sun.star.awt.PosSize import POS, SIZE, POSSIZE
     from com.sun.star.awt.PushButtonType import OK, CANCEL
@@ -592,8 +596,7 @@ def show_input_dialog_with_checkbox(message, checkbox_label, checkbox_default, t
         LABEL_HEIGHT + VERT_MARGIN + VERT_SEP,
         WIDTH - HORI_MARGIN * 2,
         EDIT_HEIGHT,
-        { "MultiLine": True, "Text": str(default),
-                 "VScroll": True},
+        {"MultiLine": True, "Text": str(default), "VScroll": True},
     )
     add(
         "checkbox",
@@ -622,14 +625,13 @@ def show_input_dialog_with_checkbox(message, checkbox_label, checkbox_default, t
         uno.createUnoStruct("com.sun.star.awt.Selection", 0, len(str(default)))
     )
     edit.setFocus()
-    
+
     if dialog.execute():
         return edit.getModel().Text, dialog.getControl("checkbox").getModel().State
     else:
         return "", False
-    
-    dialog.dispose()
 
+    dialog.dispose()
 
 
 # Export the macros properly
