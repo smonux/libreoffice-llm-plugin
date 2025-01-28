@@ -169,7 +169,7 @@ def _get_cursor():
     return xIndexAccess.getByIndex(0)
 
 
-def autocomplete():
+def autocomplete(*args):
     """Generate autocomplete suggestions using LLM"""
     try:
         # Check if API key is set
@@ -209,7 +209,7 @@ def autocomplete():
         show_message(full_error)
 
 
-def transform_text():
+def transform_text(*args):
     """Transform selected text based on instruction"""
     try:
         # Check if API key is set
@@ -249,7 +249,7 @@ def transform_text():
         response = call_llm(data)
         if response:
             if keep_original:
-                cursor.setString(selected_text + response["choices"][0]["message"]["content"])
+                cursor.setString(selected_text + "\n\n" +  response["choices"][0]["message"]["content"])
             else:
                 cursor.setString(response["choices"][0]["message"]["content"])
 
@@ -259,7 +259,7 @@ def transform_text():
         show_message(full_error)
 
 
-def show_logs():
+def show_logs(*args):
     """Display API logs in message box"""
     logs = get_api_logs(25)
     if not logs:
@@ -273,7 +273,7 @@ def show_logs():
     show_message(log_text)
 
 
-def modify_config():
+def modify_config(*args):
     """Show configuration dialog to modify parameters"""
     WIDTH = 600
     HEIGHT = 400
