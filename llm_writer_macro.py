@@ -32,15 +32,16 @@ def init_db():
     if not os.path.exists(PARAMS_PATH):
         with open(PARAMS_PATH, "w") as f:
             json.dump(
+                # The order is important for displaying the config
                 {
                     "OPENAI_ENDPOINT": "https://api.openai.com/v1/chat/completions",
                     "OPENAI_API_KEY": "",
                     "MODEL": "gpt-4o",
                     "MAX_GENERATION_WORDS": "10",
-                    "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS": AUTOCOMPLETE_DEFAULT_PROMPT,
                     "CONTEXT_PREVIOUS_CHARS": "100",
                     "CONTEXT_NEXT_CHARS": "100",
                     "TEMPERATURE": "0.7",
+                    "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS": AUTOCOMPLETE_DEFAULT_PROMPT,
                 },
                 f,
                 indent=4,
@@ -333,18 +334,23 @@ def modify_config(*args):
             {"Label": key, "NoLabel": True},
         )
 
-        # Add edit field
+        # Add edit field 
         add(
             f"edit_{i}",
             "Edit",
             HORI_MARGIN + LABEL_WIDTH + HORI_SEP,
             y_pos,
             EDIT_WIDTH,
-            ROW_HEIGHT + 30,
-            {"MultiLine": True, "Text": str(value), "VScroll": True},
+        # HACK 
+            ROW_HEIGHT + 80 * (key == "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS"),
+            {
+                "MultiLine": key == "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS",
+                "VScroll": key == "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS",
+                "Text": str(value),
+            },
         )
 
-        y_pos += ROW_HEIGHT + ROW_SPACING
+        y_pos += ROW_HEIGHT + ROW_SPACING + 80 * (key == "AUTOCOMPLETE_ADDITIONAL_INSTRUCTIONS")
 
     # Add buttons
     add(
