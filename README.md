@@ -10,7 +10,7 @@
  - **Customizable**: Configure API settings and prompt templates
  - **Logging**: View API call history and debug information
 
- [Short demonstration](/images/llm_macro.gif)
+ ![Short demonstration](/images/llm_macro.gif)
 
  ## Installation
 
