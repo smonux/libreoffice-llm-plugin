@@ -134,8 +134,10 @@ def _log_api_call(endpoint, request, response, status_code):
 
 def get_api_logs(limit=100):
     """Retrieve API logs from text file"""
+    if not os.path.exists(LOG_PATH):
+        return []
     with open(LOG_PATH, "r", encoding="utf-8") as f:
-        logs = f.readlines()[:limit]
+        logs = f.readlines()[-limit:]
         return logs
 
 
@@ -267,7 +269,7 @@ def transform_text(*args):
 
 def show_logs(*args):
     """Display API logs in message box"""
-    logs = get_api_logs(25)
+    logs = get_api_logs(10)
     if not logs:
         show_message("No API logs found")
         return
