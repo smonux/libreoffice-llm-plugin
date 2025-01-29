@@ -3,6 +3,9 @@
 
  This macro provides AI-powered text autocompletion and transformation capabilities within LibreOffice/OpenOffice using OpenAI's API.
 
+ (It's pretty similar to https://github.com/balisujohn/localwriter, from which borrows some code, but as a macro, which is easier
+ to customize).
+
  ## Features
 
  - **Autocomplete**: Continue writing naturally from the cursor position
