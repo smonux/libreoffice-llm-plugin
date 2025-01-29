@@ -10,6 +10,8 @@
  - **Customizable**: Configure API settings and prompt templates
  - **Logging**: View API call history and debug information
 
+ [Short demonstration](/images/llm_macro.gif)
+
  ## Installation
 
  1. Save the `llm_writer_macro.py` file to your LibreOffice macro directory:
