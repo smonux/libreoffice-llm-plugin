@@ -12,8 +12,8 @@ from com.sun.star.awt.PushButtonType import OK, CANCEL
 from msgbox import MsgBox
 import os
 
-PARAMS_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_params.json")
-LOG_PATH = os.path.join(os.path.expanduser("~"), "llm_writer_api_logs.log")
+PARAMS_PATH = os.path.join(os.path.expanduser("~"), ".llm_writer", "llm_writer_params.json")
+LOG_PATH = os.path.join(os.path.expanduser("~"), ".llm_writer", "llm_writer_api_logs.log")
 
 AUTOCOMPLETE_DEFAULT_PROMPT = """
 Continue the text naturally at the [COMPLETE HERE] position using the surrounding context.
@@ -26,8 +26,12 @@ Don't announce what you are going to do, just do it (e.g: here you have, etc..).
 """
 
 
-def init_db():
+def init_db_maybe():
     """Initialize JSON files for parameters and logs"""
+    # Ensure the directory exists
+    directory_path = os.path.dirname(PARAMS_PATH)
+    os.makedirs(directory_path, exist_ok=True)
+
     # Initialize parameters file
     if not os.path.exists(PARAMS_PATH):
         with open(PARAMS_PATH, "w") as f:
@@ -55,6 +59,7 @@ def init_db():
 
 def get_param(key):
     """Get parameter from JSON file"""
+    init_db_maybe()
     with open(PARAMS_PATH, "r") as f:
         params = json.load(f)
         return params.get(key)
@@ -62,6 +67,8 @@ def get_param(key):
 
 def set_param(key, value):
     """Set parameter in JSON file atomically"""
+
+    init_db_maybe()
     # Load existing params first
     with open(PARAMS_PATH, "r") as f:
         params = json.load(f)
@@ -294,6 +301,7 @@ def modify_config(*args):
     ROW_HEIGHT = 24
     ROW_SPACING = 4
 
+    init_db_maybe()
     # Load current parameters
     with open(PARAMS_PATH, "r") as f:
         params = json.load(f)
@@ -643,5 +651,5 @@ def show_input_dialog_with_checkbox(
 
 
 # Export the macros properly
-init_db()
+init_db_maybe()
 g_exportedScripts = (autocomplete, transform_text, show_logs, modify_config)
