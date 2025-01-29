@@ -236,6 +236,8 @@ def transform_text(*args):
         instruction, keep_original = show_input_dialog_with_checkbox(
             "Enter transformation instructions:", "Keep Original Text", True
         )
+        if instruction is None:
+            return
         if not instruction:
             instruction = "Perform the task present after the 'Original Text:'"
 
@@ -645,7 +647,7 @@ def show_input_dialog_with_checkbox(
     if dialog.execute():
         return edit.getModel().Text, dialog.getControl("checkbox").getModel().State
     else:
-        return "", False
+        return None, False
 
     dialog.dispose()
 
